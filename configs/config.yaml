@@ -1,0 +1,43 @@
+server:
+  port: 22211
+  mode: debug  # debug / release
+
+database:
+  host: localhost
+  port: 5432
+  user: codeql
+  password: codeql123
+  dbname: codeql_platform
+  sslmode: disable
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+
+scanner:
+  codeql_path: "D:\\tools_D\\java\\codeql-win64\\codeql\\codeql.exe"      # CodeQL CLI 路径
+  codeql_queries: "D:\\tools_D\\java\\codeql-win64\\codeql-repo\\java\\ql\\consistency-queries"      # CodeQL 查询库路径
+  work_dir: "D:\\tools_D\\java\\codeql-win64\\codeqlWorkSpace\\sourceCode"              # 扫描工作目录
+  max_concurrent: 2                         # 最大并发扫描数
+  timeout_minutes: 30                       # 单次扫描最长时间
+  supported_languages:
+    - go
+    - java
+    - javascript
+
+minio:
+  endpoint: localhost:9000
+  access_key: minioadmin
+  secret_key: minioadmin123
+  bucket: codeql-results
+  use_ssl: false
+
+openai:
+  api_key: ""
+  base_url: "https://api.openai.com/v1"
+  model: "gpt-4"
+
+jwt:
+  secret: "secret_key_wsh_loaeriver"
+  expire_hours: 72
