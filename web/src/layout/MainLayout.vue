@@ -5,6 +5,8 @@
       breakpoint="lg"
       :width="220"
       collapsible
+      :collapsed="collapsed"
+      @collapse="onCollapse"
       class="sider-bar"
     >
       <div class="logo">
@@ -61,10 +63,16 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IconDashboard, IconList, IconCommand, IconNotification } from '@arco-design/web-vue/es/icon';
 
 const router = useRouter();
+const collapsed = ref(false);
+
+const onCollapse = (value: boolean) => {
+  collapsed.value = value;
+};
 
 const handleMenuClick = (key: string) => {
   router.push({ name: key });

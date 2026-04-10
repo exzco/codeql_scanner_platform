@@ -1,8 +1,10 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 
 	"gorm.io/datatypes"
@@ -13,11 +15,12 @@ import (
 )
 
 type ScanService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	worker *scanner.ScanWorker
 }
 
-func NewScanService(db *gorm.DB) *ScanService {
-	return &ScanService{db: db}
+func NewScanService(db *gorm.DB, worker *scanner.ScanWorker) *ScanService {
+	return &ScanService{db: db, worker: worker}
 }
 
 // CreateTask creates a new scan task record
@@ -224,4 +227,83 @@ func (s *ScanService) IsDuplicateTask(repoID uint, commitSHA string) bool {
 		Where("repo_id = ? AND commit_sha = ? AND status IN ?", repoID, commitSHA, []string{model.TaskStatusPending, model.TaskStatusRunning}).
 		Count(&count)
 	return count > 0
+}
+
+func (s *ScanService) SaveScanResults(repoID, taskID uint, results []scanner.ParsedVulnerability) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		for _, p := range results {
+			vuln := &model.Vulnerability{
+				ScanTaskID:  taskID,
+				RepoID:      repoID,
+				Fingerprint: p.Fingerprint,
+			}
+
+			result := tx.Where("repo_id = ? AND fingerprint = ?", repoID, p.Fingerprint).
+				Assign(map[string]interface{}{
+					"repo_id":      repoID,
+					"scan_task_id": taskID,
+					"file_path":    p.FilePath,
+					"start_line":   p.StartLine,
+					"end_line":     p.EndLine,
+					"message":      p.Message,
+					"severity":     p.Severity,
+					"rule_id":      p.RuleID,
+					"rule_name":    p.RuleName,
+					"code_snippet": p.CodeSnippet,
+					"fingerprint":  p.Fingerprint,
+					"status":       model.VulnStatusNew,
+				}).
+				FirstOrCreate(vuln)
+
+			if result.Error != nil {
+				return fmt.Errorf("保存漏洞失败(rule=%s, file=%s, line=%d): %w", p.RuleID, p.FilePath, p.StartLine, result.Error)
+			}
+		}
+		return nil
+	})
+}
+
+func (s *ScanService) RunFullScan(repoID uint) {
+	// 1. 获取仓库信息
+	var repo model.Repository
+	if err := s.db.First(&repo, repoID).Error; err != nil {
+		log.Printf("错误：找不到仓库 %d", repoID)
+		return
+	}
+	// 2. 创建一个任务记录
+	task := &model.ScanTask{
+		RepoID:   repo.ID,
+		Status:   "running",
+		Branch:   repo.Branch,
+		Language: repo.Language,
+	}
+	s.db.Create(task)
+	// 3. 调用 Worker 开启真实流水线
+	vulns, sarifPath, err := s.worker.RunScan(context.Background(), task, &repo)
+
+	// 4. 更新任务状态与结果
+	if err != nil {
+		s.db.Model(task).Updates(map[string]interface{}{
+			"status":    "failed",
+			"error_msg": err.Error(),
+		})
+		return
+	}
+	err = s.SaveScanResults(repo.ID, task.ID, vulns)
+	if err != nil {
+		log.Printf("保存结果失败: %v", err)
+		s.db.Model(task).Updates(map[string]interface{}{
+			"status":    "failed",
+			"error_msg": err.Error(),
+		})
+		return
+	}
+
+	s.db.Model(task).Updates(map[string]interface{}{
+		"status":     "success",
+		"sarif_path": sarifPath,
+		"vuln_count": len(vulns),
+	})
+
+	log.Printf("任务 %d 扫描成功，发现 %d 个漏洞", task.ID, len(vulns))
 }

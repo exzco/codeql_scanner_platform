@@ -25,10 +25,10 @@ type Repository struct {
 
 // ScanConfigData represents the JSON structure for scan configuration
 type ScanConfigData struct {
-	QuerySuite   string   `json:"query_suite"`   // e.g., "security-extended"
-	ExcludePaths []string `json:"exclude_paths"` // paths to exclude
-	BuildCommand string   `json:"build_command"` // for compiled languages
-	ExtraArgs    []string `json:"extra_args"`    // extra codeql args
+	QuerySuite   string   `json:"query_suite"`   
+	ExcludePaths []string `json:"exclude_paths"` 
+	BuildCommand string   `json:"build_command"` 
+	ExtraArgs    []string `json:"extra_args"`    
 }
 
 // CreateRepoRequest is the request body for creating a repository

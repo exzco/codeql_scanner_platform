@@ -3,6 +3,7 @@ package scanner
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,24 +21,23 @@ func NewGitManager(workDir string) *GitManager {
 	return &GitManager{workDir: workDir}
 }
 
-// CloneRepo clones a repository to a local directory
+// authSecret 通过环境变量读取
+// mkdir src && git clone
 func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID string, authType, authSecret string) (string, error) {
 	destDir := filepath.Join(g.workDir, taskID, "src")
 	if err := os.MkdirAll(destDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	// Build the authenticated URL if needed
 	cloneURL := repoURL
 	if authType == "token" && authSecret != "" {
-		// Insert token into HTTPS URL: https://token@github.com/...
+
 		cloneURL = strings.Replace(repoURL, "https://", fmt.Sprintf("https://%s@", authSecret), 1)
 	}
 
 	args := []string{"clone", "--depth", "1", "--branch", branch, cloneURL, destDir}
 	cmd := exec.CommandContext(ctx, "git", args...)
 
-	// For SSH auth, set the GIT_SSH_COMMAND
 	if authType == "ssh_key" && authSecret != "" {
 		keyFile := filepath.Join(g.workDir, taskID, "ssh_key")
 		if err := os.WriteFile(keyFile, []byte(authSecret), 0600); err != nil {
@@ -67,11 +67,10 @@ func (g *GitManager) GetLatestCommit(ctx context.Context, repoDir string) (strin
 	return strings.TrimSpace(string(output)), nil
 }
 
-// CodeQLRunner wraps CodeQL CLI operations
 type CodeQLRunner struct {
-	codeqlPath    string
-	queriesPath   string
-	workDir       string
+	codeqlPath  string
+	queriesPath string
+	workDir     string
 }
 
 func NewCodeQLRunner(cfg *config.ScannerConfig) *CodeQLRunner {
@@ -91,7 +90,7 @@ func (c *CodeQLRunner) CreateDatabase(ctx context.Context, taskID, sourceDir, la
 		dbDir,
 		"--language=" + language,
 		"--source-root=" + sourceDir,
-		"--threads=0", // use all available threads
+		"--threads=0",
 		"--overwrite",
 	}
 
@@ -117,6 +116,12 @@ func (c *CodeQLRunner) Analyze(ctx context.Context, taskID, dbDir, language, que
 		querySuite = c.getDefaultQuerySuite(language)
 	}
 
+	if !filepath.IsAbs(querySuite) &&
+		(strings.HasSuffix(querySuite, ".ql") || strings.HasSuffix(querySuite, ".qls") ||
+			strings.Contains(querySuite, "\\") || strings.Contains(querySuite, "/")) {
+		querySuite = filepath.Join(c.queriesPath, querySuite)
+	}
+
 	args := []string{
 		"database", "analyze",
 		dbDir,
@@ -124,13 +129,16 @@ func (c *CodeQLRunner) Analyze(ctx context.Context, taskID, dbDir, language, que
 		"--format=sarif-latest",
 		"--output=" + outputFile,
 		"--threads=0",
+		"--search-path=" + c.queriesPath,
 	}
 
 	cmd := exec.CommandContext(ctx, c.codeqlPath, args...)
+	log.Printf("[CodeQL] %s %v", c.codeqlPath, args)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("codeql database analyze failed: %w\noutput: %s", err, string(output))
 	}
+	log.Printf("[Task %s] CodeQL 分析完成，结果文件: %s", taskID, outputFile)
 
 	return outputFile, nil
 }
@@ -139,9 +147,9 @@ func (c *CodeQLRunner) Analyze(ctx context.Context, taskID, dbDir, language, que
 func (c *CodeQLRunner) getDefaultQuerySuite(language string) string {
 	// Map language to CodeQL query suite
 	suiteMap := map[string]string{
-		"go":         "codeql/go-queries:codeql-suites/go-security-extended.qls",
-		"java":       "codeql/java-queries:codeql-suites/java-security-extended.qls",
-		"javascript": "codeql/javascript-queries:codeql-suites/javascript-security-extended.qls",
+		"go":         "go\\ql\\src\\codeql-suites\\go-security-extended.qls",
+		"java":       "java\\ql\\src\\codeql-suites\\java-security-extended.qls",
+		"javascript": "javascript\\ql\\src\\codeql-suites\\javascript-security-extended.qls",
 	}
 	if suite, ok := suiteMap[language]; ok {
 		return suite

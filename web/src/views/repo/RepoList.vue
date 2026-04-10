@@ -8,7 +8,7 @@
         </a-button>
       </template>
 
-      <!-- 仓库搜索/过滤 -->
+      <!-- 仓库表格 -->
       <a-table 
         :columns="columns" 
         :data="data" 
@@ -25,6 +25,7 @@
         <template #actions="{ record }">
           <a-space>
             <a-button type="text" size="small" @click="handleScan(record)">开始扫描</a-button>
+            <a-button type="text" status="warning" size="small" @click="handleOpenEdit(record)">更新</a-button>
             <a-popconfirm content="确定要删除这个仓库吗？" @ok="handleDelete(record.id)">
               <a-button type="text" status="danger" size="small">删除</a-button>
             </a-popconfirm>
@@ -33,8 +34,13 @@
       </a-table>
     </a-card>
 
-    <!-- 添加仓库对话框 -->
-    <a-modal v-model:visible="visible" title="新增仓库" @ok="handleAdd" @cancel="handleCancel">
+    <!-- 统一的增/改对话框 -->
+    <a-modal 
+      v-model:visible="visible" 
+      :title="editingId ? '更新仓库' : '新增仓库'" 
+      @ok="handleConfirm" 
+      @cancel="handleCancel"
+    >
       <a-form :model="form" auto-label-width>
         <a-form-item field="name" label="仓库名称">
           <a-input v-model="form.name" placeholder="例如：my-go-project" />
@@ -52,6 +58,13 @@
         <a-form-item field="branch" label="扫描分支">
           <a-input v-model="form.branch" placeholder="默认为 main" />
         </a-form-item>
+        <a-form-item field="auth_type" label="认证类型">
+          <a-select v-model="form.auth_type" placeholder="请选择认证类型">
+            <a-option value="none">无</a-option>
+            <a-option value="token">Token</a-option>
+            <a-option value="ssh_key">SSH Key</a-option>
+          </a-select>
+        </a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -61,10 +74,11 @@
 import { ref, reactive, onMounted } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import { IconPlus } from '@arco-design/web-vue/es/icon';
-import { getRepoList, addRepo, deleteRepo } from '../../api/repo';
+import { getRepoList, addRepo, deleteRepo, updateRepo, triggerScan } from '../../api/repo';
 
 const loading = ref(false);
 const visible = ref(false);
+const editingId = ref<number | null>(null); // 💡 正在编辑的记录 ID
 const data = ref([]);
 const pagination = reactive({
   current: 1,
@@ -72,19 +86,23 @@ const pagination = reactive({
   total: 0
 });
 
-const form = reactive({
+// 💡 提取初始表单状态以便重置
+const initialForm = {
   name: '',
   url: '',
   language: 'go',
   branch: 'main',
   auth_type: 'none',
-});
+};
+
+const form = reactive({ ...initialForm });
 
 const columns = [
   { title: '名称', dataIndex: 'name' },
   { title: 'Git 地址', dataIndex: 'url' },
   { title: '语言', slotName: 'language' },
   { title: '分支', dataIndex: 'branch' },
+  { title: '认证方式', dataIndex: 'auth_type' },
   { title: '操作', slotName: 'actions' },
 ];
 
@@ -102,18 +120,43 @@ const loadData = async () => {
 };
 
 const handleOpenAdd = () => {
+  editingId.value = null;
+  Object.assign(form, initialForm); // 重置表单为空
   visible.value = true;
 };
 
-const handleAdd = async () => {
+const handleOpenEdit = (record: any) => {
+  editingId.value = record.id;
+
+  Object.assign(form, {
+    name: record.name,
+    url: record.url,
+    language: record.language,
+    branch: record.branch,
+    auth_type: record.auth_type,
+  });
+  visible.value = true;
+};
+
+
+const handleConfirm = async () => {
   try {
-    await addRepo(form);
-    Message.success('添加成功');
+    if (editingId.value) {
+      await updateRepo(editingId.value, form);
+      Message.success('更新成功');
+    } else {
+      await addRepo(form);
+      Message.success('添加成功');
+    }
     visible.value = false;
     loadData();
   } catch (err) {
-    Message.error('添加失败');
+    Message.error(editingId.value ? '更新失败' : '添加失败');
   }
+};
+
+const handleCancel = () => {
+  visible.value = false;
 };
 
 const handleDelete = async (id: number) => {
@@ -131,9 +174,15 @@ const handlePageChange = (current: number) => {
   loadData();
 };
 
-const handleScan = (record: any) => {
-    Message.info(`即将开始扫描 ${record.name}，下一步将对接异步任务队列`);
-}
+const handleScan = async (record: any) => {
+  try {
+    await triggerScan(record.id);
+    Message.success(`已触发扫描：${record.name}，请到“扫描任务”查看分析进度与结果`);
+  } catch (e) {
+    Message.error(`触发扫描失败：${record.name}`);
+  }
+};
+
 
 onMounted(() => {
   loadData();

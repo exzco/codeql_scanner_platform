@@ -19,6 +19,11 @@ const router = createRouter({
           name: 'RepoList',
           component: () => import('../views/repo/RepoList.vue'),
         },
+        {
+          path: '/scan-tasks',
+          name: 'ScanTasks',
+          component: () => import('../views/scan/ScanTasks.vue'),
+        },
       ],
     },
   ],
