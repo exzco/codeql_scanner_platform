@@ -11,7 +11,7 @@ docker run -d \
   -e POSTGRES_USER=codeql \
   -e POSTGRES_PASSWORD=codeql123 \
   -e POSTGRES_DB=codeql_platform \
-  -v postgres_data:/var/lib/postgresql/data \
+  -v postgres_data:/var/lib/postgresql \
   postgres:latest
 ```
 

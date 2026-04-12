@@ -48,8 +48,8 @@ type ScanTask struct {
 // CreateScanRequest is the request body for manually triggering a scan
 type CreateScanRequest struct {
 	RepoID     uint   `json:"repo_id" binding:"required"`
-	Branch     string `json:"branch"`
-	QuerySuite string `json:"query_suite"`
+	Branch     string `json:"branch" binding:"required"`
+	Language   string `json:"language" binding:"required"`
 }
 
 // ScanTaskQuery contains query parameters for listing scan tasks

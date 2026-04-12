@@ -12,7 +12,6 @@ import (
 	"github.com/codeql-platform/internal/config"
 )
 
-// GitManager handles git operations
 type GitManager struct {
 	workDir string
 }
@@ -21,8 +20,6 @@ func NewGitManager(workDir string) *GitManager {
 	return &GitManager{workDir: workDir}
 }
 
-// authSecret 通过环境变量读取
-// mkdir src && git clone
 func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID string, authType, authSecret string) (string, error) {
 	destDir := filepath.Join(g.workDir, taskID, "src")
 	if err := os.MkdirAll(destDir, 0755); err != nil {
@@ -30,24 +27,14 @@ func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID stri
 	}
 
 	cloneURL := repoURL
-	if authType == "token" && authSecret != "" {
 
-		cloneURL = strings.Replace(repoURL, "https://", fmt.Sprintf("https://%s@", authSecret), 1)
+	args := []string{"clone", "--depth", "1"}
+	if branch != "" {
+		args = append(args, "--branch", branch)
 	}
-
-	args := []string{"clone", "--depth", "1", "--branch", branch, cloneURL, destDir}
+	args = append(args, cloneURL, destDir)
+	
 	cmd := exec.CommandContext(ctx, "git", args...)
-
-	if authType == "ssh_key" && authSecret != "" {
-		keyFile := filepath.Join(g.workDir, taskID, "ssh_key")
-		if err := os.WriteFile(keyFile, []byte(authSecret), 0600); err != nil {
-			return "", fmt.Errorf("failed to write SSH key: %w", err)
-		}
-		cmd.Env = append(os.Environ(),
-			fmt.Sprintf("GIT_SSH_COMMAND=ssh -i %s -o StrictHostKeyChecking=no", keyFile),
-		)
-	}
-
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("git clone failed: %w, output: %s", err, string(output))
@@ -56,7 +43,6 @@ func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID stri
 	return destDir, nil
 }
 
-// GetLatestCommit returns the latest commit SHA in the repo
 func (g *GitManager) GetLatestCommit(ctx context.Context, repoDir string) (string, error) {
 	cmd := exec.CommandContext(ctx, "git", "rev-parse", "HEAD")
 	cmd.Dir = repoDir
@@ -81,7 +67,6 @@ func NewCodeQLRunner(cfg *config.ScannerConfig) *CodeQLRunner {
 	}
 }
 
-// CreateDatabase creates a CodeQL database for the given source code
 func (c *CodeQLRunner) CreateDatabase(ctx context.Context, taskID, sourceDir, language string, buildCommand string) (string, error) {
 	dbDir := filepath.Join(c.workDir, taskID, "db")
 
@@ -150,6 +135,7 @@ func (c *CodeQLRunner) getDefaultQuerySuite(language string) string {
 		"go":         "go\\ql\\src\\codeql-suites\\go-security-extended.qls",
 		"java":       "java\\ql\\src\\codeql-suites\\java-security-extended.qls",
 		"javascript": "javascript\\ql\\src\\codeql-suites\\javascript-security-extended.qls",
+		"python":     "python\\ql\\src\\codeql-suites\\python-security-extended.qls",
 	}
 	if suite, ok := suiteMap[language]; ok {
 		return suite

@@ -16,8 +16,8 @@ export const updateRepo = (id: number, data: any) =>
 export const deleteRepo = (id: number) => 
     api.post(`/repos/delete/${id}`);
 
-export const triggerScan = (repoId: number) =>
-  api.post('/scan/tasks', { repo_id: repoId });
+export const triggerScan = (repoId: number, language: string, branch: string) =>
+  api.post('/scan/tasks', { repo_id: repoId, language, branch });
 
 export const getScanTasks = (page = 1, perPage = 20, repoId?: number, status?: string) => {
     const params = new URLSearchParams({

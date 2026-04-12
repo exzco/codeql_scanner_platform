@@ -53,6 +53,7 @@
             <a-option value="go">Go</a-option>
             <a-option value="java">Java</a-option>
             <a-option value="javascript">JavaScript</a-option>
+            <a-option value="python">Python</a-option>
           </a-select>
         </a-form-item>
         <a-form-item field="branch" label="扫描分支">
@@ -176,7 +177,7 @@ const handlePageChange = (current: number) => {
 
 const handleScan = async (record: any) => {
   try {
-    await triggerScan(record.id);
+    await triggerScan(record.id, record.language, record.branch);
     Message.success(`已触发扫描：${record.name}，请到“扫描任务”查看分析进度与结果`);
   } catch (e) {
     Message.error(`触发扫描失败：${record.name}`);

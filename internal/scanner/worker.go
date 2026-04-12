@@ -20,7 +20,7 @@ func NewScanWorker(cfg *config.ScannerConfig) *ScanWorker {
 	}
 }
 
-// RunScan 执行从代码拉取到生成 SARIF 的全流程
+// RunScan 从代码拉取到生成 SARIF 的流程合在一起
 func (w *ScanWorker) RunScan(ctx context.Context, task *model.ScanTask, repo *model.Repository) ([]ParsedVulnerability, string, error) {
 	taskID := fmt.Sprintf("%d", task.ID)
 

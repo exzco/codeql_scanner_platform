@@ -3,7 +3,7 @@ server:
   mode: debug  # debug / release
 
 database:
-  host: localhost
+  host: 192.168.1.116
   port: 5432
   user: codeql
   password: codeql123
@@ -11,9 +11,9 @@ database:
   sslmode: disable
 
 redis:
-  addr: localhost:6379
-  password: ""
-  db: 0
+  addr: 192.168.1.116:6379
+  password: "wsh_laribely"
+  db: 10
 
 scanner:
   codeql_path: "D:\\tools_D\\java\\codeql-win64\\codeql\\codeql.exe"      # CodeQL CLI 路径
@@ -25,6 +25,7 @@ scanner:
     - go
     - java
     - javascript
+    - python
 
 minio:
   endpoint: localhost:9000

@@ -25,10 +25,10 @@ type Repository struct {
 
 // ScanConfigData represents the JSON structure for scan configuration
 type ScanConfigData struct {
-	QuerySuite   string   `json:"query_suite"`   
-	ExcludePaths []string `json:"exclude_paths"` 
-	BuildCommand string   `json:"build_command"` 
-	ExtraArgs    []string `json:"extra_args"`    
+	QuerySuite   string   `json:"query_suite"`
+	ExcludePaths []string `json:"exclude_paths"`
+	BuildCommand string   `json:"build_command"`
+	ExtraArgs    []string `json:"extra_args"`
 }
 
 // CreateRepoRequest is the request body for creating a repository
@@ -36,7 +36,7 @@ type CreateRepoRequest struct {
 	Name       string          `json:"name" binding:"required"`
 	URL        string          `json:"url" binding:"required"`
 	Branch     string          `json:"branch"`
-	Language   string          `json:"language" binding:"required,oneof=go java javascript"`
+	Language   string          `json:"language" binding:"required,oneof=go java javascript python"`
 	AuthType   string          `json:"auth_type" binding:"oneof=ssh_key token none"`
 	AuthSecret string          `json:"auth_secret"`
 	ScanConfig *ScanConfigData `json:"scan_config"`
@@ -47,7 +47,7 @@ type UpdateRepoRequest struct {
 	Name       *string         `json:"name"`
 	URL        *string         `json:"url"`
 	Branch     *string         `json:"branch"`
-	Language   *string         `json:"language" binding:"omitempty,oneof=go java javascript"`
+	Language   *string         `json:"language" binding:"omitempty,oneof=go java javascript python"`
 	AuthType   *string         `json:"auth_type" binding:"omitempty,oneof=ssh_key token none"`
 	AuthSecret *string         `json:"auth_secret"`
 	ScanConfig *ScanConfigData `json:"scan_config"`

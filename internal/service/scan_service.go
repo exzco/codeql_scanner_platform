@@ -1,10 +1,8 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 
 	"gorm.io/datatypes"
@@ -23,14 +21,12 @@ func NewScanService(db *gorm.DB, worker *scanner.ScanWorker) *ScanService {
 	return &ScanService{db: db, worker: worker}
 }
 
-// CreateTask creates a new scan task record
-func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language, querySuite string) (*model.ScanTask, error) {
+func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language string) (*model.ScanTask, error) {
 	task := &model.ScanTask{
 		RepoID:      repoID,
 		TriggerType: triggerType,
 		Branch:      branch,
 		Language:    language,
-		QuerySuite:  querySuite,
 		Status:      model.TaskStatusPending,
 	}
 
@@ -40,7 +36,6 @@ func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language, que
 	return task, nil
 }
 
-// GetTask returns a scan task with its related repository
 func (s *ScanService) GetTask(id uint) (*model.ScanTask, error) {
 	var task model.ScanTask
 	if err := s.db.Preload("Repository").First(&task, id).Error; err != nil {
@@ -49,7 +44,6 @@ func (s *ScanService) GetTask(id uint) (*model.ScanTask, error) {
 	return &task, nil
 }
 
-// ListTasks returns paginated scan tasks
 func (s *ScanService) ListTasks(query *model.ScanTaskQuery) (*model.PaginatedResponse, error) {
 	if query.Page < 1 {
 		query.Page = 1
@@ -84,7 +78,6 @@ func (s *ScanService) ListTasks(query *model.ScanTaskQuery) (*model.PaginatedRes
 	}, nil
 }
 
-// UpdateTaskStatus updates the status of a scan task
 func (s *ScanService) UpdateTaskStatus(taskID uint, status string, updates map[string]interface{}) error {
 	if updates == nil {
 		updates = map[string]interface{}{}
@@ -93,11 +86,10 @@ func (s *ScanService) UpdateTaskStatus(taskID uint, status string, updates map[s
 	return s.db.Model(&model.ScanTask{}).Where("id = ?", taskID).Updates(updates).Error
 }
 
-// SaveVulnerabilities saves parsed vulnerabilities for a scan task
 func (s *ScanService) SaveVulnerabilities(taskID, repoID uint, parsed []scanner.ParsedVulnerability) (int, error) {
 	saved := 0
 	for _, p := range parsed {
-		// Convert data flow to JSON
+
 		dataFlowJSON, _ := json.Marshal(p.DataFlow)
 
 		vuln := &model.Vulnerability{
@@ -116,7 +108,6 @@ func (s *ScanService) SaveVulnerabilities(taskID, repoID uint, parsed []scanner.
 			Fingerprint: p.Fingerprint,
 		}
 
-		// Upsert: if same repo + fingerprint exists, update; otherwise create
 		result := s.db.Where("repo_id = ? AND fingerprint = ?", repoID, p.Fingerprint).
 			Assign(map[string]interface{}{
 				"scan_task_id": taskID,
@@ -132,13 +123,11 @@ func (s *ScanService) SaveVulnerabilities(taskID, repoID uint, parsed []scanner.
 		saved++
 	}
 
-	// Update vuln count on the task
 	s.db.Model(&model.ScanTask{}).Where("id = ?", taskID).Update("vuln_count", saved)
 
 	return saved, nil
 }
 
-// ListVulnerabilities returns paginated vulnerabilities
 func (s *ScanService) ListVulnerabilities(query *model.VulnQuery) (*model.PaginatedResponse, error) {
 	if query.Page < 1 {
 		query.Page = 1
@@ -182,7 +171,7 @@ func (s *ScanService) ListVulnerabilities(query *model.VulnQuery) (*model.Pagina
 	}, nil
 }
 
-// GetVulnerability returns a vulnerability by ID
+
 func (s *ScanService) GetVulnerability(id uint) (*model.Vulnerability, error) {
 	var vuln model.Vulnerability
 	if err := s.db.Preload("Repository").Preload("ScanTask").Preload("Assignee").First(&vuln, id).Error; err != nil {
@@ -191,7 +180,6 @@ func (s *ScanService) GetVulnerability(id uint) (*model.Vulnerability, error) {
 	return &vuln, nil
 }
 
-// UpdateVulnStatus updates the status of a vulnerability and logs the audit
 func (s *ScanService) UpdateVulnStatus(vulnID, operatorID uint, req *model.UpdateVulnStatusRequest) error {
 	vuln, err := s.GetVulnerability(vulnID)
 	if err != nil {
@@ -199,13 +187,9 @@ func (s *ScanService) UpdateVulnStatus(vulnID, operatorID uint, req *model.Updat
 	}
 
 	oldStatus := vuln.Status
-
-	// Update the vulnerability status
 	if err := s.db.Model(vuln).Update("status", req.Status).Error; err != nil {
 		return err
 	}
-
-	// Create audit log
 	log := &model.AuditLog{
 		VulnerabilityID: vulnID,
 		OperatorID:      operatorID,
@@ -263,47 +247,48 @@ func (s *ScanService) SaveScanResults(repoID, taskID uint, results []scanner.Par
 	})
 }
 
-func (s *ScanService) RunFullScan(repoID uint) {
-	// 1. 获取仓库信息
-	var repo model.Repository
-	if err := s.db.First(&repo, repoID).Error; err != nil {
-		log.Printf("错误：找不到仓库 %d", repoID)
-		return
-	}
-	// 2. 创建一个任务记录
-	task := &model.ScanTask{
-		RepoID:   repo.ID,
-		Status:   "running",
-		Branch:   repo.Branch,
-		Language: repo.Language,
-	}
-	s.db.Create(task)
-	// 3. 调用 Worker 开启真实流水线
-	vulns, sarifPath, err := s.worker.RunScan(context.Background(), task, &repo)
+// asynq 任务队列替换原先的同步执行
+// func (s *ScanService) RunFullScan(repoID uint) {
+// 	// 1. 获取仓库信息
+// 	var repo model.Repository
+// 	if err := s.db.First(&repo, repoID).Error; err != nil {
+// 		log.Printf("错误：找不到仓库 %d", repoID)
+// 		return
+// 	}
+// 	// 2. 创建一个任务记录
+// 	task := &model.ScanTask{
+// 		RepoID:   repo.ID,
+// 		Status:   "running",
+// 		Branch:   repo.Branch,
+// 		Language: repo.Language,
+// 	}
+// 	s.db.Create(task)
+// 	// 3. 调用 Worker 开启真实流水线
+// 	vulns, sarifPath, err := s.worker.RunScan(context.Background(), task, &repo)
 
-	// 4. 更新任务状态与结果
-	if err != nil {
-		s.db.Model(task).Updates(map[string]interface{}{
-			"status":    "failed",
-			"error_msg": err.Error(),
-		})
-		return
-	}
-	err = s.SaveScanResults(repo.ID, task.ID, vulns)
-	if err != nil {
-		log.Printf("保存结果失败: %v", err)
-		s.db.Model(task).Updates(map[string]interface{}{
-			"status":    "failed",
-			"error_msg": err.Error(),
-		})
-		return
-	}
+// 	// 4. 更新任务状态与结果
+// 	if err != nil {
+// 		s.db.Model(task).Updates(map[string]interface{}{
+// 			"status":    "failed",
+// 			"error_msg": err.Error(),
+// 		})
+// 		return
+// 	}
+// 	err = s.SaveScanResults(repo.ID, task.ID, vulns)
+// 	if err != nil {
+// 		log.Printf("保存结果失败: %v", err)
+// 		s.db.Model(task).Updates(map[string]interface{}{
+// 			"status":    "failed",
+// 			"error_msg": err.Error(),
+// 		})
+// 		return
+// 	}
 
-	s.db.Model(task).Updates(map[string]interface{}{
-		"status":     "success",
-		"sarif_path": sarifPath,
-		"vuln_count": len(vulns),
-	})
+// 	s.db.Model(task).Updates(map[string]interface{}{
+// 		"status":     "success",
+// 		"sarif_path": sarifPath,
+// 		"vuln_count": len(vulns),
+// 	})
 
-	log.Printf("任务 %d 扫描成功，发现 %d 个漏洞", task.ID, len(vulns))
-}
+// 	log.Printf("任务 %d 扫描成功，发现 %d 个漏洞", task.ID, len(vulns))
+// }
