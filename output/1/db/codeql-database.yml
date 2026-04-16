@@ -1,0 +1,13 @@
+---
+sourceLocationPrefix: D:\tools_D\codeql-\output\1\src
+baselineLinesOfCode: 1632
+unicodeNewlines: false
+columnKind: utf8
+primaryLanguage: go
+creationMetadata:
+  sha: 73214c3479d974dbbdacb421512eff091030639e
+  cliVersion: 2.24.3
+  creationTime: 2026-04-13T09:54:08.226734600Z
+overlayBaseDatabase: false
+overlayDatabase: false
+finalised: true

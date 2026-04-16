@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # app-server:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: codeql-platform-app
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./configs:/app/configs
+  #     - /mnt/d/tools_D/java/codeql-/linux-64/codeql:/opt/codeql
+  #     - /mnt/d/tools_D/codeql-/output:/app/output
+  #   environment:
+  #     - CONFIG_FILE=configs/config.docker.yaml
+  #     - GIN_MODE=release
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_started
+  #   networks:
+  #     - codeql-network
+
+  db:
+    image: postgres:latest
+    container_name: postgres-codeql
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=codeql
+      - POSTGRES_PASSWORD=codeql123
+      - POSTGRES_DB=codeql_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codeql -d codeql_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - codeql-network
+
+  redis:
+    image: redis:latest
+    container_name: redis-codeql
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass wsh_laribely
+    volumes:
+      - redis_data:/data
+    networks:
+      - codeql-network
+
+  minio:
+    image: minio/minio
+    container_name: minio-server
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - codeql-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  codeql-network:
+    driver: bridge

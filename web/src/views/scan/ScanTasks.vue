@@ -60,8 +60,41 @@
         <template #status="{ record }">
           <a-tag>{{ record.status }}</a-tag>
         </template>
+
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="viewCallStack(record)">查看调用栈</a-button>
+        </template>
       </a-table>
     </a-card>
+
+    <!-- 调用栈溯源抽屉 -->
+    <a-drawer
+      v-model:visible="callStackVisible"
+      title="漏洞调用栈溯源"
+      width="60%"
+      unmount-on-close
+    >
+      <div v-if="!currentCallStack || currentCallStack.length === 0">
+        <a-empty description="该漏洞没有调用栈数据或未提取" />
+      </div>
+      <div v-else>
+        <a-tabs default-active-key="1">
+          <a-tab-pane v-for="(path, index) in currentCallStack" :key="String(index + 1)" :title="`调用路径 ${index + 1}`">
+            <a-table
+              :columns="callStackColumns"
+              :data="path"
+              :pagination="false"
+              row-key="key"
+            >
+              <template #file_path="{ record }">
+                <a-tag color="arcoblue">{{ record.file_path }}</a-tag> 
+                <span style="margin-left: 8px;">行: {{ record.start_line }} <span v-if="record.end_line && record.end_line !== record.start_line">- {{ record.end_line }}</span></span>
+              </template>
+            </a-table>
+          </a-tab-pane>
+        </a-tabs>
+      </div>
+    </a-drawer>
   </div>
 </template>
 
@@ -89,6 +122,9 @@ const vulnPagination = reactive({
   total: 0,
 });
 
+const callStackVisible = ref(false);
+const currentCallStack = ref<any[]>([]);
+
 const taskColumns = [
   { title: '任务ID', dataIndex: 'id' },
   { title: '仓库', slotName: 'repo' },
@@ -102,13 +138,21 @@ const taskColumns = [
 ];
 
 const vulnColumns = [
-  { title: 'ID', dataIndex: 'id' },
+  { title: 'ID', dataIndex: 'id', width: 60 },
   { title: '规则', dataIndex: 'rule_id' },
-  { title: '严重性', slotName: 'severity' },
-  { title: '状态', slotName: 'status' },
+  { title: '严重性', slotName: 'severity', width: 90 },
+  { title: '状态', slotName: 'status', width: 90 },
   { title: '文件', dataIndex: 'file_path', ellipsis: true, tooltip: true },
-  { title: '行号', dataIndex: 'start_line' },
+  { title: '行号', dataIndex: 'start_line', width: 80 },
   { title: '描述', dataIndex: 'message', ellipsis: true, tooltip: true },
+  { title: '操作', slotName: 'actions', width: 100 },
+];
+
+const callStackColumns = [
+  { title: '环节', dataIndex: 'step_index', width: 70 },
+  { title: '文件位置', slotName: 'file_path' },
+  { title: '代码片段', dataIndex: 'snippet', ellipsis: true, tooltip: true },
+  { title: '额外说明', dataIndex: 'message', ellipsis: true, tooltip: true },
 ];
 
 const statusColor = (status: string) => {
@@ -164,6 +208,31 @@ const viewVulnerabilities = (task: any) => {
   selectedTaskId.value = task.id;
   vulnPagination.current = 1;
   loadVulnerabilities();
+};
+
+const viewCallStack = (record: any) => {
+  let df = record.data_flow;
+  if (typeof df === 'string') {
+    try {
+      df = JSON.parse(df);
+    } catch(e) {
+      df = [];
+    }
+  }
+  
+  if (Array.isArray(df)) {
+    currentCallStack.value = df.map((path: any[]) => {
+      if (!Array.isArray(path)) return [];
+      return path.map((step, idx) => ({
+        ...step,
+        key: `step_${idx}`,
+        step_index: idx + 1,
+      }));
+    });
+  } else {
+    currentCallStack.value = [];
+  }
+  callStackVisible.value = true;
 };
 
 const onTaskPageChange = (current: number) => {

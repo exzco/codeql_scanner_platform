@@ -46,6 +46,7 @@ type ScannerConfig struct {
 	WorkDir            string   `mapstructure:"work_dir"`
 	MaxConcurrent      int      `mapstructure:"max_concurrent"`
 	TimeoutMinutes     int      `mapstructure:"timeout_minutes"`
+	Cron               string   `mapstructure:"cron"` // e.g. "0 2 * * *"
 	SupportedLanguages []string `mapstructure:"supported_languages"`
 }
 

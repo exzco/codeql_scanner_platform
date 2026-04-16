@@ -11,6 +11,7 @@ import (
 	"github.com/codeql-platform/internal/model"
 	"github.com/codeql-platform/internal/scanner"
 	"gorm.io/gorm"
+	"gorm.io/datatypes"
 )
 
 type TaskDispatcher struct {
@@ -58,7 +59,7 @@ func (d *TaskDispatcher) handleScanRepo(ctx context.Context, t *asynq.Task) erro
 		"started_at": now,
 	})
 
-	vulns, sarifPath, err := d.worker.RunScan(ctx, &task, &repo)
+	vulns, sarifPath, err := d.worker.RunScan(ctx, &task, &repo, repo.AuthSecret)
 	finished := time.Now()
 	duration := finished.Sub(now).Milliseconds()
 
@@ -90,6 +91,8 @@ func (d *TaskDispatcher) handleScanRepo(ctx context.Context, t *asynq.Task) erro
 // 然后我的 TaskDispatcher 结构体中没有引入 ScanService 结构体，没法复用这个方法，只能复制过来改个名用
 func (d *TaskDispatcher) saveResults(repoID, taskID uint, results []scanner.ParsedVulnerability) {
 	for _, p := range results {
+		dataFlowJSON, _ := json.Marshal(p.DataFlow)
+
 		vuln := &model.Vulnerability{
 			ScanTaskID:  taskID,
 			RepoID:      repoID,
@@ -108,6 +111,7 @@ func (d *TaskDispatcher) saveResults(repoID, taskID uint, results []scanner.Pars
 				"rule_name":    p.RuleName,
 				"code_snippet": p.CodeSnippet,
 				"fingerprint":  p.Fingerprint,
+				"data_flow":    datatypes.JSON(dataFlowJSON),
 				"status":       model.VulnStatusNew,
 			}).
 			FirstOrCreate(vuln)

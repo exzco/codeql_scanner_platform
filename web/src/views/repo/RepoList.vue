@@ -66,6 +66,18 @@
             <a-option value="ssh_key">SSH Key</a-option>
           </a-select>
         </a-form-item>
+        <!-- 💡 动态显示密钥输入框 -->
+        <a-form-item 
+          v-if="form.auth_type !== 'none'" 
+          field="auth_secret" 
+          :label="form.auth_type === 'token' ? 'Access Token' : 'SSH Key'"
+          :rules="[{ required: true, message: '请输入凭证内容' }]"
+        >
+          <a-input-password 
+            v-model="form.auth_secret" 
+            :placeholder="form.auth_type === 'token' ? '请输入 Personal Access Token' : '请输入 SSH 私钥内容'" 
+          />
+        </a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -94,6 +106,7 @@ const initialForm = {
   language: 'go',
   branch: 'main',
   auth_type: 'none',
+  auth_secret: '',
 };
 
 const form = reactive({ ...initialForm });
@@ -135,6 +148,7 @@ const handleOpenEdit = (record: any) => {
     language: record.language,
     branch: record.branch,
     auth_type: record.auth_type,
+    auth_secret: '', // 💡 更新时通常不回显原始密钥，留空表示不修改（后端逻辑支持地话）或需重新输入
   });
   visible.value = true;
 };

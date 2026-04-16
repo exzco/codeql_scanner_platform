@@ -34,7 +34,7 @@ func (h *ScanHandler) CreateTask(c *gin.Context) {
 		return
 	}
 
-	task, err := h.scanSvc.CreateTask(req.RepoID, model.TriggerTypeManual, req.Branch, req.Language)
+	task, err := h.scanSvc.CreateTask(req.RepoID, model.TriggerTypeManual, req.Branch,req.Language)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create scan task: " + err.Error()})
 		return
@@ -108,7 +108,7 @@ func (h *ScanHandler) ListVulnerabilities(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "vulnerabilities fetched", "data": result})
 }
 
-// ExportSARIF 导出指定任务的 SARIF 结果文件
+//
 func (h *ScanHandler) ExportSARIF(c *gin.Context) {
 	taskID, ok := parseTaskIDParam(c)
 	if !ok {
@@ -133,7 +133,6 @@ func (h *ScanHandler) ExportSARIF(c *gin.Context) {
 	c.FileAttachment(task.SARIFPath, filename)
 }
 
-// GetSARIFSummary 获取指定任务的 SARIF 结果摘要
 func (h *ScanHandler) GetSARIFSummary(c *gin.Context) {
 	taskID, ok := parseTaskIDParam(c)
 	if !ok {

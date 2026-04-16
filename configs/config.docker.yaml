@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  mode: release
+
+database:
+  host: db
+  port: 5432
+  user: codeql
+  password: codeql123
+  dbname: codeql_platform
+  sslmode: disable
+
+redis:
+  addr: redis:6379
+  password: "wsh_laribely"
+  db: 10
+
+scanner:
+  codeql_path: "/opt/codeql/codeql"
+  codeql_queries: "/opt/codeql-repo"
+  work_dir: "/app/output"
+  max_concurrent: 2
+  timeout_minutes: 30
+  supported_languages:
+    - go
+    - java
+    - javascript
+    - python
+
+minio:
+  endpoint: minio:9000
+  access_key: minioadmin
+  secret_key: minioadmin123
+  bucket: codeql-results
+  use_ssl: false
+
+openai:
+  api_key: ""
+  base_url: "https://api.openai.com/v1"
+  model: "gpt-4"
+
+jwt:
+  secret: "secret_key_wsh_loaeriver"
+  expire_hours: 72

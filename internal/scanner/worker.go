@@ -21,12 +21,12 @@ func NewScanWorker(cfg *config.ScannerConfig) *ScanWorker {
 }
 
 // RunScan 从代码拉取到生成 SARIF 的流程合在一起
-func (w *ScanWorker) RunScan(ctx context.Context, task *model.ScanTask, repo *model.Repository) ([]ParsedVulnerability, string, error) {
+func (w *ScanWorker) RunScan(ctx context.Context, task *model.ScanTask, repo *model.Repository, authSecret string) ([]ParsedVulnerability, string, error) {
 	taskID := fmt.Sprintf("%d", task.ID)
 
 	// 1. git Clone 代码
 	log.Printf("[Task %d] 正在拉取代码...", task.ID)
-	srcDir, err := w.git.CloneRepo(ctx, repo.URL, task.Branch, taskID, repo.AuthType, "") // Token 暂时空
+	srcDir, err := w.git.CloneRepo(ctx, repo.URL, task.Branch, taskID, repo.AuthType, authSecret)
 	if err != nil {
 		return nil, "", err
 	}

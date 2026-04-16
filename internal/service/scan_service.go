@@ -21,7 +21,7 @@ func NewScanService(db *gorm.DB, worker *scanner.ScanWorker) *ScanService {
 	return &ScanService{db: db, worker: worker}
 }
 
-func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language string) (*model.ScanTask, error) {
+func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language string, ) (*model.ScanTask, error) {
 	task := &model.ScanTask{
 		RepoID:      repoID,
 		TriggerType: triggerType,

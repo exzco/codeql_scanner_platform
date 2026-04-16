@@ -1,6 +1,6 @@
 server:
-  port: 22211
-  mode: debug  # debug / release
+  port: 8088
+  mode: debug # debug / release
 
 database:
   host: localhost
@@ -16,11 +16,11 @@ redis:
   db: 10
 
 scanner:
-  codeql_path: "D:\\tools_D\\java\\codeql-win64\\codeql\\codeql.exe"      # CodeQL CLI 路径
-  codeql_queries: "D:\\tools_D\\java\\codeql-win64\\codeql-repo"      # CodeQL 查询库路径
-  work_dir: "D:\\tools_D\\codeql-\\output"              # 扫描工作目录
-  max_concurrent: 2                         # 最大并发扫描数
-  timeout_minutes: 30                       # 单次扫描最长时间
+  codeql_path: "D:\\tools_D\\java\\codeql-win64\\codeql\\codeql.exe" # CodeQL CLI 路径
+  codeql_queries: "D:\\tools_D\\java\\codeql-win64\\codeql-repo" # CodeQL 查询库路径
+  work_dir: "D:\\tools_D\\codeql-\\output" # 扫描工作目录
+  max_concurrent: 2 # 最大并发扫描数
+  timeout_minutes: 30 # 单次扫描最长时间
   supported_languages:
     - go
     - java

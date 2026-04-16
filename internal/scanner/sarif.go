@@ -78,6 +78,7 @@ type SARIFRuleRef struct {
 
 type SARIFLocation struct {
 	PhysicalLocation SARIFPhysicalLocation `json:"physicalLocation"`
+	Message          *SARIFMessage         `json:"message,omitempty"`
 }
 
 type SARIFPhysicalLocation struct {
@@ -121,28 +122,27 @@ type SARIFArtifact struct {
 	Location SARIFArtifactLocation `json:"location"`
 }
 
-// ParsedVulnerability represents a vulnerability parsed from SARIF
 type ParsedVulnerability struct {
-	RuleID      string     `json:"rule_id"`
-	RuleName    string     `json:"rule_name"`
-	Severity    string     `json:"severity"`
-	FilePath    string     `json:"file_path"`
-	StartLine   int        `json:"start_line"`
-	EndLine     int        `json:"end_line"`
-	CodeSnippet string     `json:"code_snippet"`
-	Message     string     `json:"message"`
-	DataFlow    []FlowStep `json:"data_flow"`
-	Fingerprint string     `json:"fingerprint"`
+	RuleID      string       `json:"rule_id"`
+	RuleName    string       `json:"rule_name"`
+	Severity    string       `json:"severity"`
+	FilePath    string       `json:"file_path"`
+	StartLine   int          `json:"start_line"`
+	EndLine     int          `json:"end_line"`
+	CodeSnippet string       `json:"code_snippet"`
+	Message     string       `json:"message"`
+	DataFlow    [][]FlowStep `json:"data_flow"`
+	Fingerprint string       `json:"fingerprint"`
 }
 
 type FlowStep struct {
 	FilePath  string `json:"file_path"`
 	StartLine int    `json:"start_line"`
+	EndLine   int    `json:"end_line"`
 	Message   string `json:"message"`
 	Snippet   string `json:"snippet"`
 }
 
-// ParseSARIF reads and parses a SARIF file into structured vulnerabilities
 func ParseSARIF(filePath string) ([]ParsedVulnerability, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -157,7 +157,6 @@ func ParseSARIF(filePath string) ([]ParsedVulnerability, error) {
 	var vulns []ParsedVulnerability
 
 	for _, run := range report.Runs {
-		// Build a rule lookup map
 		ruleMap := buildRuleMap(run)
 		artifactMap := buildArtifactMap(run.Artifacts)
 
@@ -170,7 +169,6 @@ func ParseSARIF(filePath string) ([]ParsedVulnerability, error) {
 				Message: msg,
 			}
 
-			// Get rule details
 			if rule, ok := ruleMap[ruleID]; ok {
 				vuln.RuleName = firstNonEmpty(
 					rule.ShortDescription.Text,
@@ -186,7 +184,6 @@ func ParseSARIF(filePath string) ([]ParsedVulnerability, error) {
 				vuln.RuleName = vuln.RuleID
 			}
 
-			// Primary location
 			if loc, ok := pickPrimaryLocation(result); ok {
 				vuln.FilePath = resolveArtifactURI(loc.ArtifactLocation, artifactMap)
 				vuln.StartLine = loc.Region.StartLine
@@ -202,14 +199,11 @@ func ParseSARIF(filePath string) ([]ParsedVulnerability, error) {
 			}
 			vuln.FilePath = normalizePath(vuln.FilePath)
 
-			// Data flow (code flows / taint tracking path)
 			vuln.DataFlow = extractDataFlow(result.CodeFlows, artifactMap)
 
-			// Fingerprint for deduplication
 			if fp, ok := result.PartialFingerprints["primaryLocationLineHash"]; ok {
 				vuln.Fingerprint = fp
 			} else {
-				// Generate a stable fingerprint fallback
 				base := fmt.Sprintf("%s|%s|%d|%d|%s", vuln.RuleID, vuln.FilePath, vuln.StartLine, vuln.EndLine, vuln.Message)
 				h := sha1.Sum([]byte(base))
 				vuln.Fingerprint = fmt.Sprintf("%x", h)
@@ -341,16 +335,23 @@ func mapLevelToSeverity(level string) string {
 	}
 }
 
-func extractDataFlow(codeFlows []SARIFCodeFlow, artifacts map[int]string) []FlowStep {
-	var steps []FlowStep
+func extractDataFlow(codeFlows []SARIFCodeFlow, artifacts map[int]string) [][]FlowStep {
+	var paths [][]FlowStep
 	for _, cf := range codeFlows {
 		for _, tf := range cf.ThreadFlows {
+			var steps []FlowStep
 			for _, loc := range tf.Locations {
 				step := FlowStep{
 					FilePath:  normalizePath(resolveArtifactURI(loc.Location.PhysicalLocation.ArtifactLocation, artifacts)),
 					StartLine: loc.Location.PhysicalLocation.Region.StartLine,
+					EndLine:   loc.Location.PhysicalLocation.Region.EndLine,
 				}
-				if loc.Message != nil {
+				if step.EndLine == 0 {
+					step.EndLine = step.StartLine
+				}
+				if loc.Location.Message != nil {
+					step.Message = firstNonEmpty(loc.Location.Message.Text, loc.Location.Message.Markdown)
+				} else if loc.Message != nil { // Fallback just in case
 					step.Message = firstNonEmpty(loc.Message.Text, loc.Message.Markdown)
 				}
 				if loc.Location.PhysicalLocation.Region.Snippet != nil {
@@ -358,9 +359,12 @@ func extractDataFlow(codeFlows []SARIFCodeFlow, artifacts map[int]string) []Flow
 				}
 				steps = append(steps, step)
 			}
+			if len(steps) > 0 {
+				paths = append(paths, steps)
+			}
 		}
 	}
-	return steps
+	return paths
 }
 
 func normalizePath(p string) string {

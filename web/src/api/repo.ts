@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:22211/api/v1',
+  baseURL: '/api/v1',
 });
 
 export const getRepoList = (page = 1, perPage = 20) => 

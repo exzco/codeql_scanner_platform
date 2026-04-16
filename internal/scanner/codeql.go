@@ -28,13 +28,23 @@ func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID stri
 
 	cloneURL := repoURL
 
+	// 如果有 token 认证，把 token 注入到 HTTPS/HTTP URL 中
+	if authType == "token" && authSecret != "" {
+		// 很多时候单纯提供 token 会被当做 password 或造成识别错误，最好补充一个占位 username，例如 oauth2
+		cloneURL = strings.Replace(cloneURL, "https://", "https://oauth2:"+authSecret+"@", 1)
+		cloneURL = strings.Replace(cloneURL, "http://", "http://oauth2:"+authSecret+"@", 1)
+	}
+
 	args := []string{"clone", "--depth", "1"}
 	if branch != "" {
 		args = append(args, "--branch", branch)
 	}
 	args = append(args, cloneURL, destDir)
-	
+
 	cmd := exec.CommandContext(ctx, "git", args...)
+	// 禁止交互式 prompt，在 Docker 内无终端时避免挂起
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("git clone failed: %w, output: %s", err, string(output))

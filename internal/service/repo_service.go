@@ -106,7 +106,7 @@ func (s *RepoService) Update(id uint, req *model.UpdateRepoRequest) (*model.Repo
 	if req.AuthType != nil {
 		updates["auth_type"] = *req.AuthType
 	}
-	if req.AuthSecret != nil {
+	if req.AuthSecret != nil && *req.AuthSecret != "" {
 		updates["auth_secret"] = *req.AuthSecret
 	}
 	if req.IsActive != nil {
