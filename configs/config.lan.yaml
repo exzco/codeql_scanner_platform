@@ -21,6 +21,24 @@ scanner:
   work_dir: "D:\\tools_D\\codeql-\\output"              # 扫描工作目录
   max_concurrent: 2                         # 最大并发扫描数
   timeout_minutes: 30                       # 单次扫描最长时间
+  default_profile: baseline
+  rule_profiles:
+    baseline:
+      description: "官方安全扩展规则（基线）"
+      include_default: true
+      targets: []
+    cve_hot:
+      description: "基线 + 你维护的 CVE/0day 规则包"
+      include_default: true
+      targets:
+        - rules/custom/cve/go-cve-hot.qls
+        - rules/custom/cve/js-cve-hot.qls
+    zero_day_only:
+      description: "只跑高危 0day 快速策略"
+      include_default: false
+      targets:
+        - rules/custom/0day/go-0day.qls
+        - rules/custom/0day/java-0day.qls
   supported_languages:
     - go
     - java

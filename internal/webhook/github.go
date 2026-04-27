@@ -114,7 +114,7 @@ func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "ignored branch deletion"})
 		return
 	}
-	
+
 	// Create Task
 	commitSHA := payload.After
 	if h.scanSvc.IsDuplicateTask(repo.ID, commitSHA) {
@@ -123,12 +123,12 @@ func (h *WebhookHandler) HandleGitHubWebhook(c *gin.Context) {
 		return
 	}
 
-	task, err := h.scanSvc.CreateTask(repo.ID, model.TriggerTypeWebhook, branch, repo.Language)
+	task, err := h.scanSvc.CreateTask(repo.ID, model.TriggerTypeWebhook, branch, repo.Language, "", "")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create scan task: " + err.Error()})
 		return
 	}
-	
+
 	// Update task with the received commit SHA
 	if commitSHA != "" {
 		h.scanSvc.UpdateTaskStatus(task.ID, task.Status, map[string]interface{}{

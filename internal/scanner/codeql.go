@@ -27,10 +27,7 @@ func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID stri
 	}
 
 	cloneURL := repoURL
-
-	// 如果有 token 认证，把 token 注入到 HTTPS/HTTP URL 中
 	if authType == "token" && authSecret != "" {
-		// 很多时候单纯提供 token 会被当做 password 或造成识别错误，最好补充一个占位 username，例如 oauth2
 		cloneURL = strings.Replace(cloneURL, "https://", "https://oauth2:"+authSecret+"@", 1)
 		cloneURL = strings.Replace(cloneURL, "http://", "http://oauth2:"+authSecret+"@", 1)
 	}
@@ -42,9 +39,8 @@ func (g *GitManager) CloneRepo(ctx context.Context, repoURL, branch, taskID stri
 	args = append(args, cloneURL, destDir)
 
 	cmd := exec.CommandContext(ctx, "git", args...)
-	// 禁止交互式 prompt，在 Docker 内无终端时避免挂起
 	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("git clone failed: %w, output: %s", err, string(output))
@@ -64,16 +60,20 @@ func (g *GitManager) GetLatestCommit(ctx context.Context, repoDir string) (strin
 }
 
 type CodeQLRunner struct {
-	codeqlPath  string
-	queriesPath string
-	workDir     string
+	codeqlPath     string
+	queriesPath    string
+	workDir        string
+	profiles       map[string]config.ScannerRuleProfile
+	defaultProfile string
 }
 
 func NewCodeQLRunner(cfg *config.ScannerConfig) *CodeQLRunner {
 	return &CodeQLRunner{
-		codeqlPath:  cfg.CodeQLPath,
-		queriesPath: cfg.CodeQLQueries,
-		workDir:     cfg.WorkDir,
+		codeqlPath:     cfg.CodeQLPath,
+		queriesPath:    cfg.CodeQLQueries,
+		workDir:        cfg.WorkDir,
+		profiles:       cfg.RuleProfiles,
+		defaultProfile: cfg.DefaultProfile,
 	}
 }
 
@@ -103,29 +103,24 @@ func (c *CodeQLRunner) CreateDatabase(ctx context.Context, taskID, sourceDir, la
 }
 
 // Analyze runs CodeQL analysis on the database
-func (c *CodeQLRunner) Analyze(ctx context.Context, taskID, dbDir, language, querySuite string) (string, error) {
+func (c *CodeQLRunner) Analyze(ctx context.Context, taskID, dbDir, language, querySuite, ruleProfile string) (string, error) {
 	outputFile := filepath.Join(c.workDir, taskID, "results.sarif")
-
-	// Determine query suite
-	if querySuite == "" {
-		querySuite = c.getDefaultQuerySuite(language)
-	}
-
-	if !filepath.IsAbs(querySuite) &&
-		(strings.HasSuffix(querySuite, ".ql") || strings.HasSuffix(querySuite, ".qls") ||
-			strings.Contains(querySuite, "\\") || strings.Contains(querySuite, "/")) {
-		querySuite = filepath.Join(c.queriesPath, querySuite)
+	targets := c.resolveAnalyzeTargets(language, querySuite, ruleProfile)
+	if len(targets) == 0 {
+		targets = []string{c.getDefaultQuerySuite(language)}
 	}
 
 	args := []string{
 		"database", "analyze",
 		dbDir,
-		querySuite,
-		"--format=sarif-latest",
-		"--output=" + outputFile,
-		"--threads=0",
-		"--search-path=" + c.queriesPath,
 	}
+	args = append(args, targets...)
+	args = append(args,
+		"--format=sarif-latest",
+		"--output="+outputFile,
+		"--threads=0",
+		"--search-path="+c.queriesPath,
+	)
 
 	cmd := exec.CommandContext(ctx, c.codeqlPath, args...)
 	log.Printf("[CodeQL] %s %v", c.codeqlPath, args)
@@ -136,6 +131,73 @@ func (c *CodeQLRunner) Analyze(ctx context.Context, taskID, dbDir, language, que
 	log.Printf("[Task %s] CodeQL 分析完成，结果文件: %s", taskID, outputFile)
 
 	return outputFile, nil
+}
+
+func (c *CodeQLRunner) resolveAnalyzeTargets(language, querySuite, ruleProfile string) []string {
+	seen := make(map[string]struct{})
+	targets := make([]string, 0, 8)
+
+	add := func(raw string) {
+		t := c.resolveTargetPath(strings.TrimSpace(raw))
+		if t == "" {
+			return
+		}
+		if _, ok := seen[t]; ok {
+			return
+		}
+		seen[t] = struct{}{}
+		targets = append(targets, t)
+	}
+
+	profileName := strings.TrimSpace(ruleProfile)
+	if profileName == "" {
+		profileName = strings.TrimSpace(c.defaultProfile)
+	}
+
+	if profileName != "" {
+		if profile, ok := c.profiles[profileName]; ok {
+			if profile.IncludeDefault {
+				add(c.getDefaultQuerySuite(language))
+			}
+			for _, t := range profile.Targets {
+				add(t)
+			}
+		}
+	}
+
+	for _, part := range strings.Split(strings.TrimSpace(querySuite), ",") {
+		add(part)
+	}
+
+	if len(targets) == 0 {
+		add(c.getDefaultQuerySuite(language))
+	}
+
+	return targets
+}
+
+func (c *CodeQLRunner) resolveTargetPath(target string) string {
+	if target == "" {
+		return ""
+	}
+
+	if filepath.IsAbs(target) {
+		return target
+	}
+
+	if abs, err := filepath.Abs(target); err == nil {
+		if _, statErr := os.Stat(abs); statErr == nil {
+			return abs
+		}
+	}
+
+	if strings.HasSuffix(target, ".ql") || strings.HasSuffix(target, ".qls") ||
+		strings.Contains(target, "\\") || strings.Contains(target, "/") {
+		return filepath.Join(c.queriesPath, target)
+	}
+
+	// pack 名（如 codeql/go-queries）或逻辑 suite 名直接透传
+	return target
 }
 
 // getDefaultQuerySuite returns the default query suite path for a language
@@ -157,6 +219,18 @@ func (c *CodeQLRunner) getDefaultQuerySuite(language string) string {
 func (c *CodeQLRunner) Cleanup(taskID string) error {
 	taskDir := filepath.Join(c.workDir, taskID)
 	return os.RemoveAll(taskDir)
+}
+
+// CleanupGeneratedInputs removes generated source and database artifacts while keeping SARIF files.
+func (c *CodeQLRunner) CleanupGeneratedInputs(taskID string) error {
+	baseDir := filepath.Join(c.workDir, taskID)
+	if err := os.RemoveAll(filepath.Join(baseDir, "src")); err != nil {
+		return err
+	}
+	if err := os.RemoveAll(filepath.Join(baseDir, "db")); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetWorkDir returns the work directory path for a task

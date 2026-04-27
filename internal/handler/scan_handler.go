@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
@@ -34,7 +35,14 @@ func (h *ScanHandler) CreateTask(c *gin.Context) {
 		return
 	}
 
-	task, err := h.scanSvc.CreateTask(req.RepoID, model.TriggerTypeManual, req.Branch,req.Language)
+	task, err := h.scanSvc.CreateTask(
+		req.RepoID,
+		model.TriggerTypeManual,
+		req.Branch,
+		req.Language,
+		req.QuerySuite,
+		req.RuleProfile,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create scan task: " + err.Error()})
 		return
@@ -108,7 +116,23 @@ func (h *ScanHandler) ListVulnerabilities(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "vulnerabilities fetched", "data": result})
 }
 
-//
+func (h *ScanHandler) DeleteTask(c *gin.Context) {
+	taskID, ok := parseTaskIDParam(c)
+	if !ok {
+		return
+	}
+
+	if err := h.scanSvc.DeleteTask(taskID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete task: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "scan task deleted",
+		"data":    gin.H{"task_id": taskID},
+	})
+}
+
 func (h *ScanHandler) ExportSARIF(c *gin.Context) {
 	taskID, ok := parseTaskIDParam(c)
 	if !ok {
@@ -236,6 +260,43 @@ func (h *ScanHandler) GetSARIFSummary(c *gin.Context) {
 			"vuln_samples":       samples,
 			"parse_entrypoint":   "internal/scanner/sarif.go::ParseSARIF",
 			"analyze_cmd_origin": "internal/scanner/codeql.go::Analyze",
+		},
+	})
+}
+
+func (h *ScanHandler) GetTaskLogs(c *gin.Context) {
+	taskID, ok := parseTaskIDParam(c)
+	if !ok {
+		return
+	}
+
+	task, err := h.scanSvc.GetTask(taskID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		return
+	}
+
+	logs := make([]string, 0, 64)
+	if trimmed := strings.TrimSpace(task.ExecutionLog); trimmed != "" {
+		for _, line := range strings.Split(trimmed, "\n") {
+			if item := strings.TrimSpace(line); item != "" {
+				logs = append(logs, item)
+			}
+		}
+	}
+
+	if task.ErrorMsg != "" {
+		logs = append(logs, "[ERROR] "+task.ErrorMsg)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "task logs fetched",
+		"data": gin.H{
+			"task_id":     task.ID,
+			"status":      task.Status,
+			"log_count":   len(logs),
+			"logs":        logs,
+			"finished_at": task.FinishedAt,
 		},
 	})
 }

@@ -37,19 +37,17 @@ func main() {
 
 	// 依赖注入
 	repoSvc := service.NewRepoService(db)
-	repoHandler := handler.NewRepoHandler(repoSvc)
 
 	asynqClient := scheduler.NewClient(&cfg.Redis)
 	defer asynqClient.Close()
 
 	scanSvc := service.NewScanService(db, nil)
+	repoHandler := handler.NewRepoHandler(repoSvc)
 	scanHandler := handler.NewScanHandler(scanSvc, asynqClient)
 
 	// webhookHandler := webhook.NewWebhookHandler(repoSvc, scanSvc, asynqClient)
 
-	cronManager := scheduler.NewCronManager(repoSvc, scanSvc, asynqClient, cfg.Scanner.Cron)
-	cronManager.Start()
-	defer cronManager.Stop()
+	log.Println("[Cron] 定时自动扫描功能已关闭，仅保留手动触发扫描")
 
 	go scheduler.StartWorker(cfg, db)
 
@@ -80,11 +78,14 @@ func main() {
 		v1.GET("/repos/list", repoHandler.ListRepos)
 		v1.POST("/repos/update/:id", repoHandler.UpdateRepos)
 		v1.POST("/repos/delete/:id", repoHandler.DeleteRepos)
+		v1.POST("/repos/batch-delete", repoHandler.BatchDeleteRepos)
 
 		// 扫描任务 API
 		v1.POST("/scan/tasks", scanHandler.CreateTask)
+		v1.POST("/scan/tasks/delete/:id", scanHandler.DeleteTask)
 		v1.GET("/scan/ListTasks", scanHandler.ListTasks)
 		v1.GET("/scan/vulnerabilities", scanHandler.ListVulnerabilities)
+		v1.GET("/scan/tasks/:id/logs", scanHandler.GetTaskLogs)
 		v1.GET("/scan/tasks/:id/sarif", scanHandler.ExportSARIF)
 		v1.GET("/scan/tasks/:id/sarif/summary", scanHandler.GetSARIFSummary)
 

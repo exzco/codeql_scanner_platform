@@ -1,0 +1,3 @@
+- description: Go 0day emergency rules
+- queries:
+  - custom/cve/go-command-injection-lite.ql

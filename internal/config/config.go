@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -41,13 +42,21 @@ type RedisConfig struct {
 }
 
 type ScannerConfig struct {
-	CodeQLPath         string   `mapstructure:"codeql_path"`
-	CodeQLQueries      string   `mapstructure:"codeql_queries"`
-	WorkDir            string   `mapstructure:"work_dir"`
-	MaxConcurrent      int      `mapstructure:"max_concurrent"`
-	TimeoutMinutes     int      `mapstructure:"timeout_minutes"`
-	Cron               string   `mapstructure:"cron"` // e.g. "0 2 * * *"
-	SupportedLanguages []string `mapstructure:"supported_languages"`
+	CodeQLPath         string                        `mapstructure:"codeql_path"`
+	CodeQLQueries      string                        `mapstructure:"codeql_queries"`
+	WorkDir            string                        `mapstructure:"work_dir"`
+	MaxConcurrent      int                           `mapstructure:"max_concurrent"`
+	TimeoutMinutes     int                           `mapstructure:"timeout_minutes"`
+	Cron               string                        `mapstructure:"cron"` // e.g. "0 2 * * *"
+	SupportedLanguages []string                      `mapstructure:"supported_languages"`
+	DefaultProfile     string                        `mapstructure:"default_profile"`
+	RuleProfiles       map[string]ScannerRuleProfile `mapstructure:"rule_profiles"`
+}
+
+type ScannerRuleProfile struct {
+	Description    string   `mapstructure:"description"`
+	IncludeDefault bool     `mapstructure:"include_default"`
+	Targets        []string `mapstructure:"targets"`
 }
 
 type MinIOConfig struct {

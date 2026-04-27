@@ -3,21 +3,24 @@ package handler
 import (
 	"net/http"
 	"strconv"
-	"github.com/gin-gonic/gin"
-	"github.com/codeql-platform/internal/model" 
+
+	"github.com/codeql-platform/internal/model"
 	"github.com/codeql-platform/internal/service"
+	"github.com/gin-gonic/gin"
 )
 
 type RepoHandler struct {
 	repoSvc *service.RepoService
 }
 
-func NewRepoHandler(svc *service.RepoService) *RepoHandler {
-	return &RepoHandler{repoSvc: svc}
+func NewRepoHandler(repoSvc *service.RepoService) *RepoHandler {
+	return &RepoHandler{
+		repoSvc: repoSvc,
+	}
 }
 
 func (h *RepoHandler) CreateRepos(c *gin.Context) {
-	var req model.CreateRepoRequest 
+	var req model.CreateRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -33,10 +36,10 @@ func (h *RepoHandler) CreateRepos(c *gin.Context) {
 }
 
 func (h *RepoHandler) ListRepos(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page","1"))
-	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page","20"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "20"))
 
-	result, err := h.repoSvc.List(page,perPage)
+	result, err := h.repoSvc.List(page, perPage)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -46,7 +49,7 @@ func (h *RepoHandler) ListRepos(c *gin.Context) {
 
 func (h *RepoHandler) UpdateRepos(c *gin.Context) {
 	idStr := c.Param("id")
-	id, _ := strconv.ParseUint(idStr,10,32)
+	id, _ := strconv.ParseUint(idStr, 10, 32)
 
 	var req model.UpdateRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -54,7 +57,7 @@ func (h *RepoHandler) UpdateRepos(c *gin.Context) {
 		return
 	}
 
-	repo, err := h.repoSvc.Update(uint(id),&req)
+	repo, err := h.repoSvc.Update(uint(id), &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -64,7 +67,7 @@ func (h *RepoHandler) UpdateRepos(c *gin.Context) {
 
 func (h *RepoHandler) DeleteRepos(c *gin.Context) {
 	idStr := c.Param("id")
-	id, _ := strconv.ParseUint(idStr,10,32)
+	id, _ := strconv.ParseUint(idStr, 10, 32)
 
 	if err := h.repoSvc.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -72,4 +75,22 @@ func (h *RepoHandler) DeleteRepos(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "仓库删除成功"})
+}
+
+func (h *RepoHandler) BatchDeleteRepos(c *gin.Context) {
+	var req model.BatchDeleteReposRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.repoSvc.DeleteBatch(req.IDs); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "仓库批量删除成功",
+		"data":    gin.H{"deleted": len(req.IDs)},
+	})
 }

@@ -10,11 +10,11 @@ import (
 )
 
 type CronManager struct {
-	cron       *cron.Cron
-	repoSvc    *service.RepoService
-	scanSvc    *service.ScanService
+	cron        *cron.Cron
+	repoSvc     *service.RepoService
+	scanSvc     *service.ScanService
 	asynqClient *asynq.Client
-	schedule   string
+	schedule    string
 }
 
 func NewCronManager(repoSvc *service.RepoService, scanSvc *service.ScanService, client *asynq.Client, schedule string) *CronManager {
@@ -22,18 +22,18 @@ func NewCronManager(repoSvc *service.RepoService, scanSvc *service.ScanService, 
 		schedule = "0 2 * * *" // default to 2:00 AM every day
 	}
 	return &CronManager{
-		cron:       cron.New(cron.WithParser(cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow))),
-		repoSvc:    repoSvc,
-		scanSvc:    scanSvc,
+		cron:        cron.New(cron.WithParser(cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow))),
+		repoSvc:     repoSvc,
+		scanSvc:     scanSvc,
 		asynqClient: client,
-		schedule:   schedule,
+		schedule:    schedule,
 	}
 }
 
 func (m *CronManager) Start() {
 	_, err := m.cron.AddFunc(m.schedule, func() {
 		log.Println("[Cron] Starting scheduled global scan...")
-		
+
 		repos, err := m.repoSvc.List(1, 1000)
 		if err != nil {
 			log.Printf("[Cron] Failed to fetch repositories: %v", err)
@@ -51,9 +51,12 @@ func (m *CronManager) Start() {
 			if !repo.IsActive {
 				continue
 			}
+			if !repo.AutoScanEnabled {
+				continue
+			}
 
 			// We use trigger type 'cron'
-			task, err := m.scanSvc.CreateTask(repo.ID, model.TriggerTypeCron, repo.Branch, repo.Language)
+			task, err := m.scanSvc.CreateTask(repo.ID, model.TriggerTypeCron, repo.Branch, repo.Language, "", "")
 			if err != nil {
 				log.Printf("[Cron] Failed to create scan task for repo %s: %v", repo.Name, err)
 				continue

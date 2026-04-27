@@ -16,8 +16,22 @@ export const updateRepo = (id: number, data: any) =>
 export const deleteRepo = (id: number) => 
     api.post(`/repos/delete/${id}`);
 
-export const triggerScan = (repoId: number, language: string, branch: string) =>
-  api.post('/scan/tasks', { repo_id: repoId, language, branch });
+export const batchDeleteRepos = (ids: number[]) =>
+    api.post('/repos/batch-delete', { ids });
+
+export interface TriggerScanPayload {
+    repo_id: number;
+    language: string;
+    branch: string;
+    query_suite?: string;
+    rule_profile?: string;
+}
+
+export const triggerScan = (payload: TriggerScanPayload) =>
+    api.post('/scan/tasks', payload);
+
+export const deleteScanTask = (taskId: number) =>
+    api.post(`/scan/tasks/delete/${taskId}`);
 
 export const getScanTasks = (page = 1, perPage = 20, repoId?: number, status?: string) => {
     const params = new URLSearchParams({
@@ -33,3 +47,6 @@ export const getScanTasks = (page = 1, perPage = 20, repoId?: number, status?: s
 
 export const getScanVulnerabilities = (taskId: number, page = 1, perPage = 20) =>
     api.get(`/scan/vulnerabilities?task_id=${taskId}&page=${page}&per_page=${perPage}`);
+
+export const getScanTaskLogs = (taskId: number) =>
+    api.get(`/scan/tasks/${taskId}/logs`);

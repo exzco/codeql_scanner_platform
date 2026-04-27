@@ -21,12 +21,18 @@ func NewScanService(db *gorm.DB, worker *scanner.ScanWorker) *ScanService {
 	return &ScanService{db: db, worker: worker}
 }
 
-func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language string, ) (*model.ScanTask, error) {
+func (s *ScanService) GetDB() *gorm.DB {
+	return s.db
+}
+
+func (s *ScanService) CreateTask(repoID uint, triggerType, branch, language, querySuite, ruleProfile string) (*model.ScanTask, error) {
 	task := &model.ScanTask{
 		RepoID:      repoID,
 		TriggerType: triggerType,
 		Branch:      branch,
 		Language:    language,
+		QuerySuite:  querySuite,
+		RuleProfile: ruleProfile,
 		Status:      model.TaskStatusPending,
 	}
 
@@ -88,6 +94,11 @@ func (s *ScanService) UpdateTaskStatus(taskID uint, status string, updates map[s
 
 func (s *ScanService) SaveVulnerabilities(taskID, repoID uint, parsed []scanner.ParsedVulnerability) (int, error) {
 	saved := 0
+	repoURL := ""
+	var repo model.Repository
+	if err := s.db.Select("url").First(&repo, repoID).Error; err == nil {
+		repoURL = repo.URL
+	}
 	for _, p := range parsed {
 
 		dataFlowJSON, _ := json.Marshal(p.DataFlow)
@@ -95,6 +106,7 @@ func (s *ScanService) SaveVulnerabilities(taskID, repoID uint, parsed []scanner.
 		vuln := &model.Vulnerability{
 			ScanTaskID:  taskID,
 			RepoID:      repoID,
+			RepoURL:     repoURL,
 			RuleID:      p.RuleID,
 			RuleName:    p.RuleName,
 			Severity:    p.Severity,
@@ -111,6 +123,7 @@ func (s *ScanService) SaveVulnerabilities(taskID, repoID uint, parsed []scanner.
 		result := s.db.Where("repo_id = ? AND fingerprint = ?", repoID, p.Fingerprint).
 			Assign(map[string]interface{}{
 				"scan_task_id": taskID,
+				"repo_url":     repoURL,
 				"code_snippet": p.CodeSnippet,
 				"message":      p.Message,
 				"data_flow":    datatypes.JSON(dataFlowJSON),
@@ -171,13 +184,24 @@ func (s *ScanService) ListVulnerabilities(query *model.VulnQuery) (*model.Pagina
 	}, nil
 }
 
-
 func (s *ScanService) GetVulnerability(id uint) (*model.Vulnerability, error) {
 	var vuln model.Vulnerability
 	if err := s.db.Preload("Repository").Preload("ScanTask").Preload("Assignee").First(&vuln, id).Error; err != nil {
 		return nil, err
 	}
 	return &vuln, nil
+}
+
+func (s *ScanService) DeleteTask(taskID uint) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Unscoped().Where("scan_task_id = ?", taskID).Delete(&model.Vulnerability{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Delete(&model.ScanTask{}, taskID).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (s *ScanService) UpdateVulnStatus(vulnID, operatorID uint, req *model.UpdateVulnStatusRequest) error {
@@ -215,16 +239,24 @@ func (s *ScanService) IsDuplicateTask(repoID uint, commitSHA string) bool {
 
 func (s *ScanService) SaveScanResults(repoID, taskID uint, results []scanner.ParsedVulnerability) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
+		repoURL := ""
+		var repo model.Repository
+		if err := tx.Select("url").First(&repo, repoID).Error; err == nil {
+			repoURL = repo.URL
+		}
+
 		for _, p := range results {
 			vuln := &model.Vulnerability{
 				ScanTaskID:  taskID,
 				RepoID:      repoID,
+				RepoURL:     repoURL,
 				Fingerprint: p.Fingerprint,
 			}
 
 			result := tx.Where("repo_id = ? AND fingerprint = ?", repoID, p.Fingerprint).
 				Assign(map[string]interface{}{
 					"repo_id":      repoID,
+					"repo_url":     repoURL,
 					"scan_task_id": taskID,
 					"file_path":    p.FilePath,
 					"start_line":   p.StartLine,
