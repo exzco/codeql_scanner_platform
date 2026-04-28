@@ -1,0 +1,46 @@
+---
+sourceLocationPrefix: D:\tools_D\codeql-\output\28\src
+baselineLinesOfCode: 221484
+unicodeNewlines: false
+columnKind: utf8
+primaryLanguage: go
+inProgress:
+  primaryLanguage: go
+  installedExtractors:
+    actions:
+     - D:/tools_D/java/codeql-win64/codeql/actions
+    cpp:
+     - D:/tools_D/java/codeql-win64/codeql/cpp
+    csharp:
+     - D:/tools_D/java/codeql-win64/codeql/csharp
+    csv:
+     - D:/tools_D/java/codeql-win64/codeql/csv
+    go:
+     - D:/tools_D/java/codeql-win64/codeql/go
+    html:
+     - D:/tools_D/java/codeql-win64/codeql/html
+    java:
+     - D:/tools_D/java/codeql-win64/codeql/java
+    javascript:
+     - D:/tools_D/java/codeql-win64/codeql/javascript
+    properties:
+     - D:/tools_D/java/codeql-win64/codeql/properties
+    python:
+     - D:/tools_D/java/codeql-win64/codeql/python
+    ruby:
+     - D:/tools_D/java/codeql-win64/codeql/ruby
+    rust:
+     - D:/tools_D/java/codeql-win64/codeql/rust
+    swift:
+     - D:/tools_D/java/codeql-win64/codeql/swift
+    xml:
+     - D:/tools_D/java/codeql-win64/codeql/xml
+    yaml:
+     - D:/tools_D/java/codeql-win64/codeql/yaml
+creationMetadata:
+  sha: c1b5264bfd1f07ec84ce926dffbd2c4630bb5351
+  cliVersion: 2.24.3
+  creationTime: 2026-04-28T04:15:22.953155Z
+overlayDatabase: false
+overlayBaseDatabase: false
+finalised: false

@@ -10,11 +10,6 @@ const router = createRouter({
       redirect: '/repos',
       children: [
         {
-          path: '/dashboard',
-          name: 'Dashboard',
-          component: () => import('../views/dashboard/index.vue'),
-        },
-        {
           path: '/repos',
           name: 'RepoList',
           component: () => import('../views/repo/RepoList.vue'),

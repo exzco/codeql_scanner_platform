@@ -1,0 +1,39 @@
+[T 04:15:23 30088] Initializing tracer.
+[T 04:15:23 30088] Initializing tags.
+[T 04:15:23 30088] CodeQL CLI version 2.24.3
+[T 04:15:23 30088] Initializing tracer.
+[T 04:15:23 30088] Initializing tags.
+[T 04:15:23 30088] Allocated ID 5135140800007588_0000000000000001 (parent )
+[T 04:15:23 30088] ==== Candidate to intercept: D:\tools_D\java\codeql-win64\codeql\tools\win64\runner.exe (30140) ====
+[T 04:15:23 30088] Executing the following tracer actions:
+[T 04:15:23 30088] Tracer actions:
+[T 04:15:23 30088] pre_invocations(0)
+[T 04:15:23 30088] post_invocations(0)
+[T 04:15:23 30088] trace_languages(1): [go]
+[T 04:15:23 30140] Initializing tracer.
+[T 04:15:23 30140] Initializing tags.
+[T 04:15:23 30140] ID set to 5135140800007588_0000000000000001 (parent root)
+[T 04:15:23 30140] Allocated ID F1F8269B000075BC_0000000000000001 (parent 5135140800007588_0000000000000001)
+[T 04:15:23 30140] ==== Candidate to intercept: C:\Windows\System32\cmd.exe (30164) ====
+[T 04:15:23 30140] Executing the following tracer actions:
+[T 04:15:23 30140] Tracer actions:
+[T 04:15:23 30140] pre_invocations(0)
+[T 04:15:23 30140] post_invocations(0)
+[T 04:15:23 30140] trace_languages(1): [go]
+[T 04:15:23 30164] Initializing tracer.
+[T 04:15:23 30164] Initializing tags.
+[T 04:15:23 30164] ID set to F1F8269B000075BC_0000000000000001 (parent 5135140800007588_0000000000000001)
+[T 04:15:23 30164] Allocated ID 2C238CE8000075D4_0000000000000001 (parent F1F8269B000075BC_0000000000000001)
+[T 04:15:23 30164] ==== Candidate to intercept: D:\tools_D\java\codeql-win64\codeql\go\tools\win64\go-autobuilder.exe (30184) ====
+[T 04:15:23 30164] Lua: === Intercepted call to d:\tools_d\java\codeql-win64\codeql\go\tools\win64\go-autobuilder.exe ===
+[T 04:15:23 30164] Lua: Disabling tracing for language go.
+[T 04:15:23 30164] Executing the following tracer actions:
+[T 04:15:23 30164] Tracer actions:
+[T 04:15:23 30164] pre_invocations(0)
+[T 04:15:23 30164] post_invocations(0)
+[T 04:15:23 30164] trace_languages(0): []
+[T 04:15:23 30184] Initializing tracer.
+[T 04:15:23 30184] Initializing tags.
+[T 04:15:23 30184] ID set to 2C238CE8000075D4_0000000000000001 (parent F1F8269B000075BC_0000000000000001)
+[T 04:15:23 30184] Skipping tracer hook installation due to rpc being absent, or it being disabled.
+

@@ -20,6 +20,9 @@ func NewRepoService(db *gorm.DB) *RepoService {
 }
 
 func (s *RepoService) Create(req *model.CreateRepoRequest) (*model.Repository, error) {
+	if req.AutoScanEnabled {
+		return nil, fmt.Errorf("定时扫描功能已取消，暂不支持开启自动扫描")
+	}
 	repo := &model.Repository{
 		Name:            req.Name,
 		URL:             req.URL,
@@ -104,6 +107,9 @@ func (s *RepoService) Update(id uint, req *model.UpdateRepoRequest) (*model.Repo
 	repo, err := s.GetByID(id)
 	if err != nil {
 		return nil, err
+	}
+	if req.AutoScanEnabled != nil && *req.AutoScanEnabled {
+		return nil, fmt.Errorf("定时扫描功能已取消，暂不支持开启自动扫描")
 	}
 
 	updates := map[string]interface{}{}

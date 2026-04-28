@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -44,14 +45,35 @@ func (d *TaskDispatcher) handleScanRepo(ctx context.Context, t *asynq.Task) erro
 
 	log.Printf("[Asynq] 开始处理扫描任务: repo_id=%d, task_id=%d", payload.RepoID, payload.TaskID)
 
-	var repo model.Repository
-	if err := d.db.First(&repo, payload.RepoID).Error; err != nil {
-		return fmt.Errorf("找不到仓库 %d: %w", payload.RepoID, err)
-	}
-
 	var task model.ScanTask
 	if err := d.db.First(&task, payload.TaskID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[Asynq] 扫描任务不存在，跳过处理: task_id=%d", payload.TaskID)
+			return nil
+		}
 		return fmt.Errorf("找不到任务 %d: %w", payload.TaskID, err)
+	}
+
+	if task.TriggerType == model.TriggerTypeCron {
+		d.appendTaskLog(payload.TaskID, "定时扫描功能已停用，任务自动取消。")
+		d.db.Model(&task).Updates(map[string]interface{}{
+			"status":    model.TaskStatusCanceled,
+			"error_msg": "定时扫描功能已停用",
+		})
+		return nil
+	}
+
+	var repo model.Repository
+	if err := d.db.First(&repo, payload.RepoID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			d.appendTaskLog(payload.TaskID, "仓库已删除或不可用，任务自动取消。")
+			d.db.Model(&task).Updates(map[string]interface{}{
+				"status":    model.TaskStatusCanceled,
+				"error_msg": "仓库不存在或已删除",
+			})
+			return nil
+		}
+		return fmt.Errorf("找不到仓库 %d: %w", payload.RepoID, err)
 	}
 
 	now := time.Now()

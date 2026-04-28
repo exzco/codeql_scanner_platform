@@ -1,0 +1,492 @@
+[2026-04-28 12:15:15] This is codeql database create D:\tools_D\codeql-\output\29\db --language=go --source-root=D:\tools_D\codeql-\output\29\src --threads=0 --overwrite
+[2026-04-28 12:15:15] Log file was started late.
+[2026-04-28 12:15:15] [PROGRESS] database create> Initializing database at D:\tools_D\codeql-\output\29\db.
+[2026-04-28 12:15:16] Running plumbing command: codeql database init --overwrite --language=go --extractor-options-verbosity=1 --qlconfig-file=D:\tools_D\codeql-\qlconfig.yml --source-root=D:\tools_D\codeql-\output\29\src --allow-missing-source-root=false --allow-already-existing -- D:\tools_D\codeql-\output\29\db
+[2026-04-28 12:15:16] Calling plumbing command: codeql resolve languages --extractor-options-verbosity=1 --format=betterjson
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Scanning for [codeql-extractor.yml] from D:\tools_D\java\codeql-win64\codeql\.codeqlmanifest.json
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\actions\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\cpp\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\csharp\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\csv\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\go\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\html\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\java\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\javascript\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\properties\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\python\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\ruby\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\rust\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\swift\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\xml\codeql-extractor.yml.
+[2026-04-28 12:15:16] [DETAILS] resolve languages> Parsing D:\tools_D\java\codeql-win64\codeql\yaml\codeql-extractor.yml.
+[2026-04-28 12:15:16] Plumbing command codeql resolve languages completed:
+                      {
+                        "aliases" : {
+                          "c" : "cpp",
+                          "c++" : "cpp",
+                          "c-c++" : "cpp",
+                          "c-cpp" : "cpp",
+                          "c#" : "csharp",
+                          "java-kotlin" : "java",
+                          "kotlin" : "java",
+                          "javascript-typescript" : "javascript",
+                          "typescript" : "javascript"
+                        },
+                        "extractors" : {
+                          "actions" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\actions",
+                              "extractor_options" : { }
+                            }
+                          ],
+                          "cpp" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\cpp",
+                              "extractor_options" : {
+                                "scale_timeouts" : {
+                                  "title" : "Value to scale compiler introspection timeouts with",
+                                  "description" : "The extractor attempts to determine what compiler the source code being extracted is compiled with. To this end the extractor makes additional calls to the compiler, some of which are expected to return within a certain fixed time (either 10s or 15s). On some systems that are under high load this time might be too short, and can be scaled up using this option.\n",
+                                  "type" : "string",
+                                  "pattern" : "[0-9]+"
+                                },
+                                "log_verbosity" : {
+                                  "title" : "Verbosity of the extractor logging",
+                                  "description" : "Set the verbosity of the extractor logging to 'quiet' (0), 'normal' (1), 'chatty' (2), or 'noisy' (3). The default is 'normal'.\n",
+                                  "type" : "string",
+                                  "pattern" : "[0-3]"
+                                }
+                              }
+                            }
+                          ],
+                          "csharp" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\csharp",
+                              "extractor_options" : {
+                                "trap" : {
+                                  "title" : "Options pertaining to TRAP.",
+                                  "description" : "Options pertaining to TRAP.",
+                                  "type" : "object",
+                                  "properties" : {
+                                    "compression" : {
+                                      "title" : "Controls compression for the TRAP files written by the extractor.",
+                                      "description" : "This option is only intended for use in debugging the extractor. Accepted values are 'brotli' (the default, to write brotli-compressed TRAP), 'gzip', and 'none' (to write uncompressed TRAP).\n",
+                                      "type" : "string",
+                                      "pattern" : "^(none|gzip|brotli)$"
+                                    }
+                                  }
+                                },
+                                "buildless" : {
+                                  "title" : "DEPRECATED - Whether to use buildless (standalone) extraction.",
+                                  "description" : "DEPRECATED: Use `--build-mode none` instead.\nA value indicating, which type of extraction the autobuilder should perform. If 'true', then the standalone extractor will be used, otherwise tracing extraction will be performed. The default is 'false'. Note that buildless extraction will generally yield less accurate analysis results, and should only be used in cases where it is not possible to build the code (for example if it uses inaccessible dependencies).\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                },
+                                "logging" : {
+                                  "title" : "Options pertaining to logging.",
+                                  "description" : "Options pertaining to logging.",
+                                  "type" : "object",
+                                  "properties" : {
+                                    "verbosity" : {
+                                      "title" : "Extractor logging verbosity level.",
+                                      "description" : "Controls the level of verbosity of the extractor. The supported levels are (in order of increasing verbosity):\n  - off\n  - errors\n  - warnings\n  - info or progress\n  - debug or progress+\n  - trace or progress++\n  - progress+++\n",
+                                      "type" : "string",
+                                      "pattern" : "^(off|errors|warnings|(info|progress)|(debug|progress\\+)|(trace|progress\\+\\+)|progress\\+\\+\\+)$"
+                                    }
+                                  }
+                                },
+                                "binlog" : {
+                                  "title" : "Binlog",
+                                  "description" : "[EXPERIMENTAL] The value is a path to the MsBuild binary log file that should be extracted. This option only works when `--build-mode none` is also specified.\n",
+                                  "type" : "array"
+                                },
+                                "buildless_dependency_dir" : {
+                                  "title" : "The path where buildless (standalone) extraction should keep dependencies.",
+                                  "description" : "If set, the buildless (standalone) extractor will store dependencies in this directory.\n",
+                                  "type" : "string"
+                                }
+                              }
+                            }
+                          ],
+                          "csv" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\csv"
+                            }
+                          ],
+                          "go" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\go",
+                              "extractor_options" : {
+                                "extract_tests" : {
+                                  "title" : "Whether to include Go test files in the CodeQL database.",
+                                  "description" : "A value indicating whether Go test files should be included in the CodeQL database. The default is 'false'.\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                },
+                                "extract_vendor_dirs" : {
+                                  "title" : "Whether to include Go vendor directories in the CodeQL database.",
+                                  "description" : "A value indicating whether Go vendor directories should be included in the CodeQL database. The default is 'false'.\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                }
+                              }
+                            }
+                          ],
+                          "html" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\html"
+                            }
+                          ],
+                          "java" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\java",
+                              "extractor_options" : {
+                                "exclude" : {
+                                  "title" : "A glob excluding files from analysis.",
+                                  "description" : "A glob indicating what files to exclude from the analysis. This accepts glob patterns that are supported by Java's 'getPathMatcher' implementation.\n",
+                                  "type" : "string"
+                                },
+                                "add_prefer_source" : {
+                                  "title" : "Whether to always prefer source files over class files.",
+                                  "description" : "A value indicating whether source files should be preferred over class files. If set to 'true', the extraction adds '-Xprefer:source' to the javac command line. If set to 'false', the extraction uses the default javac behavior ('-Xprefer:newer'). The default is 'true'.\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                },
+                                "buildless" : {
+                                  "title" : "Whether to use buildless (standalone) extraction (experimental).",
+                                  "description" : "A value indicating, which type of extraction the autobuilder should perform. If 'true', then the standalone extractor will be used, otherwise tracing extraction will be performed. The default is 'false'. Note that buildless extraction will generally yield less accurate analysis results, and should only be used in cases where it is not possible to build the code (for example if it uses inaccessible dependencies).\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                },
+                                "buildless_dependency_dir" : {
+                                  "title" : "The path where buildless (standalone) extraction should keep dependencies.",
+                                  "description" : "If set, the buildless (standalone) extractor will store dependencies in this directory.\n",
+                                  "type" : "string"
+                                },
+                                "minimize_dependency_jars" : {
+                                  "title" : "Whether to rewrite and minimize downloaded JAR dependencies (experimental).",
+                                  "description" : "If 'true', JAR dependencies downloaded during extraction will be rewritten to remove unneeded data, such as method bodies. The default is 'false'.\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                }
+                              }
+                            }
+                          ],
+                          "javascript" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\javascript",
+                              "extractor_options" : {
+                                "skip_types" : {
+                                  "title" : "Skip type extraction for TypeScript",
+                                  "description" : "Whether to skip the extraction of types in a TypeScript application",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                }
+                              }
+                            }
+                          ],
+                          "properties" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\properties"
+                            }
+                          ],
+                          "python" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\python",
+                              "extractor_options" : {
+                                "logging" : {
+                                  "title" : "Options pertaining to logging.",
+                                  "description" : "Options pertaining to logging.",
+                                  "type" : "object",
+                                  "properties" : {
+                                    "verbosity" : {
+                                      "title" : "Python extractor logging verbosity level.",
+                                      "description" : "Controls the level of verbosity of the CodeQL Python extractor.\nThe supported levels are (in order of increasing verbosity):\n\n  - off\n  - errors\n  - warnings\n  - info or progress\n  - debug or progress+\n  - trace or progress++\n  - progress+++\n",
+                                      "type" : "string",
+                                      "pattern" : "^(off|errors|warnings|(info|progress)|(debug|progress\\+)|(trace|progress\\+\\+)|progress\\+\\+\\+)$"
+                                    }
+                                  }
+                                },
+                                "python_executable_name" : {
+                                  "title" : "Controls the name of the Python executable used by the Python extractor.",
+                                  "description" : "The Python extractor uses platform-dependent heuristics to determine the name of the Python executable to use. Specifying a value for this option overrides the name of the Python executable used by the extractor. Accepted values are py, python and python3. Use this setting with caution, the Python extractor requires Python 3 to run.\n",
+                                  "type" : "string",
+                                  "pattern" : "^(py|python|python3)$"
+                                }
+                              }
+                            }
+                          ],
+                          "ruby" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\ruby",
+                              "extractor_options" : {
+                                "trap" : {
+                                  "title" : "Options pertaining to TRAP.",
+                                  "description" : "Options pertaining to TRAP.",
+                                  "type" : "object",
+                                  "properties" : {
+                                    "compression" : {
+                                      "title" : "Controls compression for the TRAP files written by the extractor.",
+                                      "description" : "This option is only intended for use in debugging the extractor. Accepted values are 'gzip' (the default, to write gzip-compressed TRAP) 'zstd' (to write Zstandard-compressed TRAP) and 'none' (to write uncompressed TRAP).\n",
+                                      "type" : "string",
+                                      "pattern" : "^(none|gzip|zstd)$"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "rust" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\rust",
+                              "extractor_options" : {
+                                "trap" : {
+                                  "title" : "Options pertaining to TRAP.",
+                                  "description" : "Options pertaining to TRAP.",
+                                  "type" : "object",
+                                  "properties" : {
+                                    "compression" : {
+                                      "title" : "Controls compression for the TRAP files written by the extractor.",
+                                      "description" : "This option is only intended for use in debugging the extractor. Accepted values are 'gzip' (to write gzip-compressed TRAP) 'zstd' (to write Zstandard-compressed TRAP) and 'none' (the default, to write uncompressed TRAP).\n",
+                                      "type" : "string",
+                                      "pattern" : "^(none|gzip|zstd)$"
+                                    }
+                                  }
+                                },
+                                "cargo_target_dir" : {
+                                  "title" : "Directory to use for cargo output files.",
+                                  "description" : "This value is an optional path to use as `CARGO_TARGET_DIR` for the internal cargo commands the extractor uses. Pointing it to a persistent directory may reduce execution time of consecutive extractor runs. By default, a new scratch directory is used for each run.\n",
+                                  "type" : "string"
+                                },
+                                "cargo_target" : {
+                                  "title" : "Target architecture",
+                                  "description" : "Target architecture to use for analysis, analogous to `cargo --target`. By default the host architecture is used.\n",
+                                  "type" : "string"
+                                },
+                                "cargo_features" : {
+                                  "title" : "Cargo features to turn on",
+                                  "description" : "Comma-separated list of features to turn on. By default all features are enabled. If any features are specified, then only those features are enabled. The `default` feature must be explicitly specified if only default features are desired. Can be repeated.\n",
+                                  "type" : "array"
+                                },
+                                "cargo_cfg_overrides" : {
+                                  "title" : "Cargo cfg overrides",
+                                  "description" : "Comma-separated list of cfg settings to enable, or disable if prefixed with `-`. Can be repeated.\n",
+                                  "type" : "array"
+                                },
+                                "logging" : {
+                                  "title" : "Options pertaining to logging.",
+                                  "description" : "Options pertaining to logging.",
+                                  "type" : "object",
+                                  "properties" : {
+                                    "verbosity" : {
+                                      "title" : "Extractor logging verbosity level.",
+                                      "description" : "Controls the level of verbosity of the extractor. The supported levels are (in order of increasing verbosity):\n  - off\n  - errors\n  - warnings\n  - info or progress\n  - debug or progress+\n  - trace or progress++\n  - progress+++\n",
+                                      "type" : "string",
+                                      "pattern" : "^(off|errors|warnings|(info|progress)|(debug|progress\\+)|(trace|progress\\+\\+)|progress\\+\\+\\+)$"
+                                    },
+                                    "flamegraph" : {
+                                      "title" : "[Experimental] File path for write flame graph log",
+                                      "description" : "Collect flame graph data using the `tracing-flame` crate. To render a flame graph or chart, run the `inferno-flamegraph` command. See also: https://crates.io/crates/tracing-flame\n",
+                                      "type" : "string"
+                                    }
+                                  }
+                                },
+                                "extract_dependencies_as_source" : {
+                                  "title" : "Extract dependencies as source code",
+                                  "description" : "Extract the full source code of dependencies instead of only extracting signatures.\n",
+                                  "type" : "string",
+                                  "pattern" : "^(false|true)$"
+                                }
+                              }
+                            }
+                          ],
+                          "swift" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\swift"
+                            }
+                          ],
+                          "xml" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\xml"
+                            }
+                          ],
+                          "yaml" : [
+                            {
+                              "extractor_root" : "D:\\tools_D\\java\\codeql-win64\\codeql\\yaml"
+                            }
+                          ]
+                        }
+                      }
+[2026-04-28 12:15:16] [PROGRESS] database init> Calculating baseline information in D:\tools_D\codeql-\output\29\src
+[2026-04-28 12:15:16] [SPAMMY] database init> Ignoring the following directories when processing baseline information: .git, .hg, .svn.
+[2026-04-28 12:15:16] [DETAILS] database init> Running command in D:\tools_D\codeql-\output\29\src: D:\tools_D\java\codeql-win64\codeql\tools\win64\scc.exe --by-file --exclude-dir .git,.hg,.svn --format json --no-large --no-min .
+[2026-04-28 12:15:17] Using configure-baseline script D:\tools_D\java\codeql-win64\codeql\go\tools\configure-baseline.cmd.
+[2026-04-28 12:15:17] [PROGRESS] database init> Running command in D:\tools_D\codeql-\output\29\src: [D:\tools_D\java\codeql-win64\codeql\go\tools\configure-baseline.cmd]
+[2026-04-28 12:15:17] Using configure-baseline script D:\tools_D\java\codeql-win64\codeql\actions\tools\configure-baseline.cmd.
+[2026-04-28 12:15:17] [PROGRESS] database init> Running command in D:\tools_D\codeql-\output\29\src: [D:\tools_D\java\codeql-win64\codeql\actions\tools\configure-baseline.cmd]
+[2026-04-28 12:15:18] [SPAMMY] database init> Ignored an additional 120 files when processing baseline information for YAML due to paths and paths-ignore configuration.
+[2026-04-28 12:15:18] [SPAMMY] database init> Found 541 baseline files for go.
+[2026-04-28 12:15:18] [SPAMMY] database init> Found 14 baseline files for actions.
+[2026-04-28 12:15:18] [PROGRESS] database init> Calculated baseline information for languages: actions, go (1.5s).
+[2026-04-28 12:15:18] [PROGRESS] database init> Resolving extractor go.
+[2026-04-28 12:15:18] [DETAILS] database init> Found candidate extractor root for go: D:\tools_D\java\codeql-win64\codeql\go.
+[2026-04-28 12:15:18] [PROGRESS] database init> Successfully loaded extractor Go (go) from D:\tools_D\java\codeql-win64\codeql\go.
+[2026-04-28 12:15:19] [PROGRESS] database init> Created skeleton CodeQL database at D:\tools_D\codeql-\output\29\db. This in-progress database is ready to be populated by an extractor.
+[2026-04-28 12:15:19] Plumbing command codeql database init completed.
+[2026-04-28 12:15:19] Using autobuild script D:\tools_D\java\codeql-win64\codeql\go\tools\autobuild.cmd.
+[2026-04-28 12:15:19] [DETAILS] database create> Detected autobuild command for Go: D:\tools_D\java\codeql-win64\codeql\go\tools\autobuild.cmd.
+[2026-04-28 12:15:19] [PROGRESS] database create> Running build command: [D:\tools_D\java\codeql-win64\codeql\go\tools\autobuild.cmd]
+[2026-04-28 12:15:19] Running plumbing command: codeql database trace-command --threads=0 --working-dir=D:\tools_D\codeql-\output\29\src --index-traceless-dbs --no-db-cluster -- D:\tools_D\codeql-\output\29\db D:\tools_D\java\codeql-win64\codeql\go\tools\autobuild.cmd
+[2026-04-28 12:15:19] [PROGRESS] database trace-command> Running command in D:\tools_D\codeql-\output\29\src: [D:\tools_D\java\codeql-win64\codeql\go\tools\autobuild.cmd]
+[2026-04-28 12:15:20] [build-stderr] 2026/04/28 12:15:20 Autobuilder was built with go1.26.0, environment has go1.25.0
+[2026-04-28 12:15:20] [build-stderr] 2026/04/28 12:15:20 LGTM_SRC is D:\tools_D\codeql-\output\29\src
+[2026-04-28 12:15:20] [build-stderr] 2026/04/28 12:15:20 Found no go.work files in the workspace; looking for go.mod files...
+[2026-04-28 12:15:20] [build-stderr] 2026/04/28 12:15:20 Found 4 go.mod files in: go.mod, pkg\apis\monitoring\go.mod, pkg\client\go.mod, scripts\go.mod.
+[2026-04-28 12:15:20] [build-stderr] 2026/04/28 12:15:20 Found 4 go.mod file(s).
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/go-kit/log v0.2.1
+[2026-04-28 12:15:20] [build-stderr] go: downloading k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/KimMachineGun/automemlimit v0.7.5
+[2026-04-28 12:15:20] [build-stderr] go: downloading k8s.io/api v0.35.4
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/prometheus/alertmanager v0.32.0
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/alecthomas/kingpin/v2 v2.4.0
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b
+[2026-04-28 12:15:20] [build-stderr] go: downloading k8s.io/apimachinery v0.35.4
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/mitchellh/hashstructure v1.1.0
+[2026-04-28 12:15:20] [build-stderr] go: downloading github.com/oklog/run v1.2.0
+[2026-04-28 12:15:20] [build-stderr] go: downloading k8s.io/apiextensions-apiserver v0.35.4
+[2026-04-28 12:15:22] [build-stderr] go: downloading github.com/prometheus-community/prom-label-proxy v0.13.0
+[2026-04-28 12:15:23] [build-stderr] go: downloading github.com/prometheus/exporter-toolkit v0.16.0
+[2026-04-28 12:15:23] [build-stderr] go: downloading github.com/prometheus/prometheus v0.311.3
+[2026-04-28 12:15:23] [build-stderr] go: downloading k8s.io/client-go v0.35.4
+[2026-04-28 12:15:23] [build-stderr] go: downloading github.com/thanos-io/thanos v0.41.0
+[2026-04-28 12:15:23] [build-stderr] go: downloading github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+[2026-04-28 12:15:27] [build-stderr] go: downloading github.com/go-test/deep v1.1.1
+[2026-04-28 12:15:27] [build-stderr] go: downloading k8s.io/apiserver v0.35.4
+[2026-04-28 12:15:28] [build-stderr] go: downloading sigs.k8s.io/controller-runtime v0.23.3
+[2026-04-28 12:15:31] [build-stderr] go: downloading k8s.io/component-base v0.35.4
+[2026-04-28 12:15:31] [build-stderr] go: downloading k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a
+[2026-04-28 12:15:31] [build-stderr] go: downloading github.com/prometheus/sigv4 v0.4.1
+[2026-04-28 12:15:31] [build-stderr] go: downloading github.com/efficientgo/core v1.0.0-rc.3
+[2026-04-28 12:15:31] [build-stderr] go: downloading github.com/metalmatze/signal v0.0.0-20210307161603-1c9aa721a97a
+[2026-04-28 12:15:31] [build-stderr] go: downloading github.com/coreos/go-systemd/v22 v22.7.0
+[2026-04-28 12:15:32] [build-stderr] go: downloading github.com/mdlayher/vsock v1.2.1
+[2026-04-28 12:15:32] [build-stderr] go: downloading github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
+[2026-04-28 12:15:33] [build-stderr] go: downloading golang.org/x/term v0.42.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.67.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/otel v1.43.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.42.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.43.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/otel/sdk v1.43.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading go.opentelemetry.io/otel/trace v1.43.0
+[2026-04-28 12:15:33] [build-stderr] go: downloading google.golang.org/grpc v1.80.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/grafana/regexp v0.0.0-20250905093917-f7b3be9d1853
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/jpillora/backoff v1.0.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/mdlayher/socket v0.5.1
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/config v1.32.13
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/credentials v1.19.13
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/sts v1.41.10
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/moby/spdystream v0.5.1
+[2026-04-28 12:15:35] [build-stderr] go: downloading go.opentelemetry.io/otel/metric v1.43.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading go.opentelemetry.io/otel/sdk/metric v1.43.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading go.opentelemetry.io/proto/otlp v1.10.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/prometheus/client_golang/exp v0.0.0-20260325093428-d8591d0db856
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/prometheus/otlptranslator v1.0.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
+[2026-04-28 12:15:35] [build-stderr] go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.7
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.21
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/cenkalti/backoff/v5 v5.0.3
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.21
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/internal/ini v1.8.6
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/signin v1.0.9
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/sso v1.30.14
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.18
+[2026-04-28 12:15:35] [build-stderr] go: downloading google.golang.org/api v0.272.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0
+[2026-04-28 12:15:35] [build-stderr] go: downloading github.com/dennwc/varint v1.0.0
+[2026-04-28 12:15:36] [build-stderr] go: downloading github.com/emicklei/go-restful/v3 v3.13.0
+[2026-04-28 12:15:36] [build-stderr] go: downloading github.com/bboreham/go-loser v0.0.0-20230920113527-fcc2c21820a3
+[2026-04-28 12:15:36] [build-stderr] go: downloading github.com/google/pprof v0.0.0-20260302011040-a15ffb7f9dcc
+[2026-04-28 12:15:36] [build-stderr] go: downloading cloud.google.com/go v0.120.0
+[2026-04-28 12:15:36] [build-stderr] go: downloading github.com/mitchellh/go-ps v1.0.0
+[2026-04-28 12:15:36] [build-stderr] go: downloading github.com/minio/sha256-simd v1.0.1
+[2026-04-28 12:15:36] [build-stderr] go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9
+[2026-04-28 12:15:53] [build-stderr] go: downloading cloud.google.com/go/auth v0.18.2
+[2026-04-28 12:15:53] [build-stderr] go: downloading github.com/googleapis/enterprise-certificate-proxy v0.3.14
+[2026-04-28 12:15:53] [build-stderr] go: downloading github.com/googleapis/gax-go/v2 v2.18.0
+[2026-04-28 12:15:53] [build-stderr] go: downloading github.com/googleapis/gax-go v2.0.2+incompatible
+[2026-04-28 12:15:58] [build-stderr] 2026/04/28 12:15:58 We have run `go mod tidy -e` and it altered go.mod. You may wish to check these changes into version control. 
+[2026-04-28 12:15:58] [build-stderr] go: downloading k8s.io/api v0.35.2
+[2026-04-28 12:15:58] [build-stderr] go: downloading k8s.io/apimachinery v0.35.2
+[2026-04-28 12:15:58] [build-stderr] go: downloading k8s.io/apiextensions-apiserver v0.35.2
+[2026-04-28 12:16:02] [build-stderr] 2026/04/28 12:16:02 We have run `go mod tidy -e` and it altered go.mod. You may wish to check these changes into version control. 
+[2026-04-28 12:16:02] [build-stderr] go: downloading k8s.io/client-go v0.35.2
+[2026-04-28 12:16:05] [build-stderr] 2026/04/28 12:16:05 We have run `go mod tidy -e` and it altered go.mod. You may wish to check these changes into version control. 
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/google/go-jsonnet v0.22.0
+[2026-04-28 12:16:05] [build-stderr] go: downloading k8s.io/code-generator v0.35.2
+[2026-04-28 12:16:05] [build-stderr] go: downloading sigs.k8s.io/controller-tools v0.20.1
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/prometheus/prometheus v0.311.2
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/ahmetb/gen-crd-api-reference-docs v0.3.1-0.20241111191808-71fefeed8910
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/bwplotka/mdox v0.9.1-0.20260318034157-e88e0a8655a0
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/yeya24/promlinter v0.3.0
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/jsonnet-bundler/jsonnet-bundler v0.6.0
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/golangci/golangci-lint/v2 v2.11.4
+[2026-04-28 12:16:05] [build-stderr] go: downloading github.com/brancz/gojsontoyaml v0.1.0
+[2026-04-28 12:16:07] [build-stderr] go: downloading gopkg.in/alecthomas/kingpin.v2 v2.2.6
+[2026-04-28 12:16:07] [build-stderr] go: downloading github.com/ghodss/yaml v1.0.0
+[2026-04-28 12:16:07] [build-stderr] go: downloading k8s.io/gengo/v2 v2.0.0-20250922181213-ec3ebc5fd46b
+[2026-04-28 12:16:08] [build-stderr] go: downloading github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+[2026-04-28 12:16:08] [build-stderr] go: downloading github.com/charmbracelet/glamour v0.6.0
+[2026-04-28 12:16:08] [build-stderr] go: downloading github.com/efficientgo/core v1.0.0-rc.2
+[2026-04-28 12:16:08] [build-stderr] go: downloading github.com/efficientgo/tools/extkingpin v0.0.0-20230505153745-6b7392939a60
+[2026-04-28 12:16:08] [build-stderr] go: downloading github.com/felixge/fgprof v0.9.5
+[2026-04-28 12:16:11] [build-stderr] go: downloading github.com/google/cel-go v0.26.0
+[2026-04-28 12:16:11] [build-stderr] go: downloading k8s.io/apiserver v0.35.2
+[2026-04-28 12:16:11] [build-stderr] go: downloading github.com/onsi/gomega v1.39.1
+[2026-04-28 12:16:11] [build-stderr] go: downloading golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated
+[2026-04-28 12:16:12] [build-stderr] go: downloading k8s.io/component-base v0.35.2
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/elliotchance/orderedmap/v2 v2.2.0
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/mattn/go-sqlite3 v1.14.17
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/Kunde21/markdownfmt/v3 v3.1.0
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/gohugoio/hugo v0.120.4
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/theckman/yacspin v0.13.12
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/gocolly/colly/v2 v2.1.1-0.20201013153555-8252c346cfb0
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/mattn/go-shellwords v1.0.12
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/go-logfmt/logfmt v0.5.1
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/yuin/goldmark-emoji v1.0.2
+[2026-04-28 12:16:12] [build-stderr] go: downloading golang.org/x/tools/go/expect v0.1.1-deprecated
+[2026-04-28 12:16:12] [build-stderr] go: downloading github.com/nsf/jsondiff v0.0.0-20260207060731-8e8d90c4c0ac
+[2026-04-28 12:16:13] [build-stderr] go: downloading github.com/prometheus/exporter-toolkit v0.15.1
+[2026-04-28 12:16:13] [build-stderr] go: downloading github.com/stoewer/go-strcase v1.3.0
+[2026-04-28 12:16:13] [build-stderr] go: downloading github.com/sergi/go-diff v1.3.1
+[2026-04-28 12:16:13] [build-stderr] go: downloading github.com/alecthomas/chroma v0.10.0
+[2026-04-28 12:16:14] [build-stderr] go: downloading github.com/microcosm-cc/bluemonday v1.0.21
+[2026-04-28 12:16:14] [build-stderr] go: downloading github.com/muesli/reflow v0.3.0
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/hashicorp/go-version v1.8.0
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/ldez/grignotin v0.10.1
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/pelletier/go-toml v1.9.5
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/spf13/viper v1.12.0
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/antlr4-go/antlr/v4 v4.13.0
+[2026-04-28 12:16:15] [build-stderr] go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260316180232-0b37fe3546d5
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/PuerkitoBio/goquery v1.5.1
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/antchfx/htmlquery v1.2.3
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/antchfx/xmlquery v1.3.4
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/kennygrant/sanitize v1.2.4
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/temoto/robotstxt v1.1.1
+[2026-04-28 12:16:15] [build-stderr] go: downloading google.golang.org/appengine v1.6.8
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/ec2 v1.296.0
+[2026-04-28 12:16:15] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/ecs v1.74.0
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/elasticache v1.51.12
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/kafka v1.49.1
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/lightsail v1.51.0
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/aws/aws-sdk-go-v2/service/rds v1.117.0
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v4 v4.3.0
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/Code-Hex/go-generics-cache v1.5.1
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/hashicorp/consul/api v1.32.1
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v5 v5.7.0
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/digitalocean/godo v1.178.0
+[2026-04-28 12:16:16] [build-stderr] go: downloading github.com/hetznercloud/hcloud-go/v2 v2.36.0
+[2026-04-28 12:16:17] [build-stderr] go: downloading github.com/ionos-cloud/sdk-go/v6 v6.3.6
+[2026-04-28 12:16:17] [build-stderr] go: downloading github.com/linode/linodego v1.66.0

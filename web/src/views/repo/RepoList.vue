@@ -1,6 +1,6 @@
 <template>
-  <div class="repo-container">
-    <a-card title="代码仓库管理" :bordered="false" class="premium-card">
+  <div class="h-full w-full mx-auto max-w-screen-2xl px-5 flex flex-col gap-5 overflow-hidden">
+    <a-card title="代码仓库管理" :bordered="false" class="rounded-lg flex flex-col w-full h-full flex-shrink-0">
       <template #extra>
         <a-space>
           <a-popconfirm
@@ -18,33 +18,36 @@
         </a-space>
       </template>
 
-      <a-table
-        row-key="id"
-        :columns="columns"
-        :data="data"
-        :row-selection="rowSelection"
-        :scroll="{ x: 1080 }"
-        size="small"
-        :loading="loading"
-        :pagination="pagination"
-        @page-change="handlePageChange"
-      >
-        <template #language="{ record }">
-          <a-tag :color="record.language === 'go' ? 'blue' : 'green'">
-            {{ record.language }}
-          </a-tag>
-        </template>
+      <div class="flex-1 overflow-hidden h-full">
+        <a-table
+          row-key="id"
+          :columns="columns"
+          :data="data"
+          :row-selection="rowSelection"
+          :scroll="{ x: '100%', y: '100%' }"
+          size="small"
+          :loading="loading"
+          :pagination="pagination"
+          @page-change="handlePageChange"
+          class="h-full w-full"
+        >
+          <template #language="{ record }">
+            <a-tag :color="record.language === 'go' ? 'blue' : 'green'">
+              {{ record.language }}
+            </a-tag>
+          </template>
 
-        <template #actions="{ record }">
-          <a-space class="repo-actions" :size="10">
-            <a-button type="text" size="small" @click="handleScan(record)">开始扫描</a-button>
-            <a-button type="text" status="warning" size="small" @click="handleOpenEdit(record)">更新</a-button>
-            <a-popconfirm content="确定要删除这个仓库吗？" @ok="handleDelete(record.id)">
-              <a-button type="text" status="danger" size="small">删除</a-button>
-            </a-popconfirm>
-          </a-space>
-        </template>
-      </a-table>
+          <template #actions="{ record }">
+            <a-space class="repo-actions" :size="10">
+              <a-button type="text" size="small" @click="handleScan(record)">开始扫描</a-button>
+              <a-button type="text" status="warning" size="small" @click="handleOpenEdit(record)">更新</a-button>
+              <a-popconfirm content="确定要删除这个仓库吗？" @ok="handleDelete(record.id)">
+                <a-button type="text" status="danger" size="small">删除</a-button>
+              </a-popconfirm>
+            </a-space>
+          </template>
+        </a-table>
+      </div>
     </a-card>
 
     <a-modal
@@ -96,7 +99,7 @@
       </a-form>
     </a-modal>
 
-  <a-modal :visible="scanVisible" @update:visible="(v) => (scanVisible = v)" title="触发扫描" @ok="handleConfirmScan">
+    <a-modal :visible="scanVisible" @update:visible="(v) => (scanVisible = v)" title="触发扫描" @ok="handleConfirmScan">
       <a-form :model="scanForm" auto-label-width>
         <a-form-item field="rule_profile" label="规则策略">
           <a-select v-model="scanForm.rule_profile" placeholder="baseline / cve_hot / zero_day_only">
@@ -110,7 +113,6 @@
         </a-form-item>
       </a-form>
     </a-modal>
-
   </div>
 </template>
 
@@ -401,16 +403,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.repo-container {
-  max-width: 1080px;
-  margin: 0 auto;
-}
-.premium-card {
-  border-radius: 8px;
-  box-shadow: none;
-}
-
-/* 去掉本页主要组件阴影，保持视觉一致，但剔除内部元素的全局污染 */
 :deep(.arco-card),
 :deep(.arco-modal) {
   box-shadow: none !important;

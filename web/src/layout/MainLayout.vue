@@ -1,5 +1,5 @@
 <template>
-  <a-layout class="layout-container">
+  <a-layout class="h-screen w-full overflow-hidden">
     <!-- 侧边栏 -->
     <a-layout-sider
       breakpoint="lg"
@@ -7,11 +7,11 @@
       collapsible
       :collapsed="collapsed"
       @collapse="onCollapse"
-      class="sider-bar"
+      class="border-r border-[var(--color-border)]"
     >
-      <div class="logo">
+      <div class="flex h-16 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg-3)] px-5 text-white">
         <img src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb05116f409152c0a42bc0.png~tplv-uwbnlip3yd-webp.webp" />
-        <span v-if="!collapsed">CodeQL Platform</span>
+        <span v-if="!collapsed" class="text-lg font-semibold">CodeQL Platform</span>
       </div>
       <a-menu
         :default-selected-keys="['RepoList']"
@@ -35,7 +35,7 @@
     <!-- 主主体区 -->
     <a-layout>
       <!-- 顶栏 -->
-      <a-layout-header class="header-bar">
+      <a-layout-header class="flex h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-3)] px-5">
         <div class="header-left">
           <a-breadcrumb>
             <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -51,7 +51,7 @@
       </a-layout-header>
 
       <!-- 内容区 -->
-      <a-layout-content class="content-body">
+      <a-layout-content class="flex-1 overflow-auto bg-[var(--color-bg-1)] p-5">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
@@ -78,38 +78,3 @@ const handleMenuClick = (key: string) => {
   router.push({ name: key });
 };
 </script>
-
-<style scoped>
-.layout-container {
-  height: 100vh;
-}
-.logo {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  color: #fff;
-  font-weight: bold;
-  font-size: 18px;
-  background: var(--color-bg-3);
-  border-bottom: 1px solid var(--color-border);
-}
-.logo img {
-  width: 32px;
-  margin-right: 10px;
-}
-.header-bar {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  background: var(--color-bg-3);
-  border-bottom: 1px solid var(--color-border);
-}
-.content-body {
-  padding: 24px;
-  background: var(--color-fill-2);
-  overflow-y: auto;
-}
-</style>
